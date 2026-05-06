@@ -164,7 +164,7 @@ window.sendData = async function() {
 			headers: { "Content-Type": "text/plain" },
 			body: JSON.stringify({
 				token: document.getElementById('token').value.trim(),
-				date: document.getElementById('date').value.replaceAll('/', '-') + " +08:00",
+				date: document.getElementById('date').value,
 				title: document.getElementById('title').value,
 				content: document.getElementById('content').value,
 				pic: document.getElementById('pic').value 
