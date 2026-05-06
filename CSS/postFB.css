@@ -45,6 +45,20 @@ h1 { font-size: 1.2rem; margin: 10px 0; color: #1c1e21; text-align: center; }
 .modal-body-scroll { flex: 1; overflow-y: auto; padding: 20px; box-sizing: border-box; }
 .modal-img { width: 100%; border-radius: 10px; margin-top: 15px; margin-bottom: 10px; display: block;}
 #titleFilter { padding-right: 40px !important; border-right: 20px solid transparent !important; /* 數字越大，箭頭越往左 */ margin-right: -35px !important; -webkit-appearance: menulist; /* 強制回復原生外觀以利擠壓 */ appearance: menulist;}
-footer { padding: 40px 20px 120px 20px; text-align: center; background-color: transparent; color: #888; font-size: 0.85rem;  line-height: 1.6;}
-footer p { margin: 5px 0; /* 縮小段落間距 */}
-footer p:last-child { font-size: 0.8rem;opacity: 0.7;}
+footer {
+    padding: 20px 20px 100px 20px; /* 上方縮減為 20px，下方留 100px 避開底欄 */
+    text-align: center;
+    background-color: transparent;
+    color: #999;           /* 顏色再調淺一點，減少存在感 */
+    font-size: 0.75rem;    /* 字體從 0.85 縮小到 0.75 */
+    line-height: 1.4;      /* 行高縮短，讓兩行字靠攏 */
+}
+
+footer p {
+    margin: 2px 0;         /* 讓版權與聲明的間距更小 */
+}
+
+footer p:last-child {
+    font-size: 0.7rem;     /* 聲明文字縮到最小 */
+    opacity: 0.6;          /* 增加透明度，讓它像浮水印一樣不干擾閱讀 */
+}
