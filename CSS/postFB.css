@@ -54,7 +54,7 @@ h1 { font-size: 1.2rem; margin: 10px 0; color: #1c1e21; text-align: center; }
 .modal-img { width: 100%; border-radius: 10px; margin-top: 15px; margin-bottom: 10px; display: block;}
 #titleFilter { padding-right: 40px !important; border-right: 20px solid transparent !important; /* 數字越大，箭頭越往左 */ margin-right: -35px !important; -webkit-appearance: menulist; /* 強制回復原生外觀以利擠壓 */ appearance: menulist;}
 footer {
-    padding: 20px 20px 50px 20px; /* 上方縮減為 20px，下方留 100px 避開底欄 */
+    padding: 20px 20px 30px 20px; /* 上方縮減為 20px，下方留 100px 避開底欄 */
     text-align: center;
     background-color: transparent;
     color: #999;           /* 顏色再調淺一點，減少存在感 */
