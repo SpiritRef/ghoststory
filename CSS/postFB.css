@@ -3,6 +3,14 @@ body { font-family: -apple-system, system-ui, sans-serif; background: #f0f2f5; m
 .container { width: 100%; max-width: 600px; margin: 0 auto; }
 h1 { font-size: 1.2rem; margin: 10px 0; color: #1c1e21; text-align: center; }
 
+/* B方案：懸浮服務按鈕 */
+.floating-service-btn {position: fixed;top: 15px;right: 15px;z-index: 3000; background: rgba(28, 30, 33, 0.9); color: #ffffff;padding: 8px 16px;border-radius: 20px;text-decoration: none;font-size: 0.85rem;font-weight: bold;box-shadow: 0 4px 10px rgba(0,0,0,0.3);border: 1px solid #444;transition: all 0.3s ease;display: flex;align-items: center;gap: 5px;}
+
+.floating-service-btn:hover { background: #000000; transform: scale(1.05); box-shadow: 0 6px 15px rgba(0,0,0,0.4); color: #ffc107; }
+
+/* 避免在手機版擋到標題，可以稍微縮小 */
+@media (max-width: 480px) {.floating-service-btn { padding: 6px 12px;font-size: 0.75rem;top: 10px;right: 10px; }}
+
 /* 搜尋與按鈕容器维持混合排版 (並排 + 獨立) */
 .search-group { display: flex; gap: 8px; margin-bottom: 10px; }
 .search-bar { width: 100%; padding: 12px 15px; font-size: 16px; border-radius: 20px; border: 1px solid #ddd; box-sizing: border-box; outline: none; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 15px; }
