@@ -2,8 +2,8 @@ import * as utils from './API.js';
 
 // --- 1. 配置設定 ---
 const iniPath = 'settings/inputData.ini';
-const GITHUB_USER = "Renchen0619";
-const GITHUB_REPO = "postFB";
+const GITHUB_USER = "SpiritRef";
+const GITHUB_REPO = "ghoststory";
 const GITHUB_PATH = "pic"; 
 
 let updateGithub_URL = "";
