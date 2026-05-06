@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+	<meta charset="UTF-8">
+	<title>小說庫後台 - 內容匯入與圖片上傳</title>
+	<style>
+		body { font-family: sans-serif; background: #f4f4f9; padding: 20px; display: flex; justify-content: center; }
+		.admin-card { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
+		.field { margin-bottom: 15px; }
+		label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
+		input, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+		#token { border: 2px solid #1877f2; background: #e7f3ff; }
+		/* 檔案上傳樣式 */
+		.file-area { background: #f9f9f9; padding: 10px; border: 1px dashed #bbb; border-radius: 5px; margin-bottom: 15px; }
+		button { width: 100%; padding: 12px; background: #1877f2; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 5px; }
+		button:hover { background: #145dbf; }
+		.btn-upload { background: #28a745; margin-bottom: 10px; }
+		.btn-upload:hover { background: #218838; }
+		#status { margin-top: 15px; text-align: center; font-weight: bold; font-size: 14px; white-space: pre-line; }
+		hr { margin: 20px 0; border: 0; border-top: 1px solid #eee; }
+	</style>
+</head>
+<body>
+
+<div class="admin-card">
+	<h2>🔑 內容匯入管理</h2>
+	
+	<div class="field">
+		<label>Admin 上傳密碼</label>
+		<input type="password" id="token" placeholder="請輸入密碼">
+	</div>
+
+	<div class="file-area">
+		<label>📁 上傳圖片至 GitHub</label>
+		<input type="file" id="fileInput" accept="image/*" multiple>
+		<button class="btn-upload" onclick="uploadToGithub()">1. 上傳圖片</button>
+	</div>
+
+	<hr>
+
+	<div class="field">
+		<label>發佈日期</label>
+		<input type="text" id="date">
+	</div>
+
+	<div class="field">
+		<label>標題</label>
+		<input type="text" id="title">
+	</div>
+
+	<div class="field">
+		<label>內容</label>
+		<textarea id="content" rows="6"></textarea>
+	</div>
+
+	<div class="field">
+		<label>圖片路徑 (自動填入)</label>
+		<input type="text" id="pic" placeholder="pic/example.jpg">
+	</div>
+
+	<button onclick="sendData()">2. 確認匯入資料庫</button>
+	<div id="status"></div>
+</div>
+
+<script type="module" src="Javascript/inputData.js"></script>
+
+</body>
+</html>
