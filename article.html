@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>鬼磕頭日誌 | 靈界紀實</title>
+	<link rel="stylesheet" href="CSS/postFB.css">
+	<style>
+		.article-container { max-width: 800px; margin: 40px auto; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+		.back-link { display: inline-block; margin-bottom: 20px; color: #888; text-decoration: none; font-weight: bold; }
+		.back-link:hover { color: #333; }
+		.full-img { width: 100%; max-width: 600px; display: block; margin: 15px auto; border-radius: 5px; }
+		.full-content { font-size: 1.15em; line-height: 1.8; white-space: pre-wrap; word-wrap: break-word; color: #333; }
+	</style>
+</head>
+<body>
+	<div class="article-container">
+		<a href="javascript:history.back()" class="back-link">← 返回列表</a>
+		<div id="art-date" class="post-date"></div>
+		<h1 id="art-title" style="margin: 10px 0 20px 0;"></h1>
+		<div id="art-images"></div>
+		<div id="art-body" class="full-content">載入中...</div>
+	</div>
+
+	<script type="module">
+		// 複用日期格式化邏輯
+		function formatDate(raw) {
+			if (!raw) return "";
+			let d = (typeof raw === 'number') ? new Date((raw - 25569) * 86400 * 1000) : new Date(raw);
+			return isNaN(d.getTime()) ? raw : d.toLocaleString('zh-TW');
+		}
+
+		window.addEventListener('DOMContentLoaded', () => {
+			const params = new URLSearchParams(window.location.search);
+			const postId = params.get('id');
+			const dataRaw = localStorage.getItem('cached_novel_data');
+
+			if (!postId || !dataRaw) {
+				document.getElementById('art-body').innerText = "找不到文章資料，請返回首頁重試。";
+				return;
+			}
+
+			const allPosts = JSON.parse(dataRaw);
+			const post = allPosts.find(p => (p["ID"] || p["發佈日期"]).toString() === postId);
+
+			if (post) {
+				document.title = `${post["標題"] || "文章內容"} | 鬼磕頭日誌`;
+				document.getElementById('art-title').innerText = post["標題"] || "無標題";
+				document.getElementById('art-date').innerText = formatDate(post["發佈日期"]);
+				document.getElementById('art-body').innerText = post["貼文內容"];
+
+				const imgData = post["圖片網址"] || post["圖片"] || "";
+				const imgBox = document.getElementById('art-images');
+				if (imgData) {
+					imgData.split(/\r?\n|\|/).forEach(src => {
+						if(src.trim()) {
+							const img = document.createElement('img');
+							img.src = src.trim();
+							img.className = 'full-img';
+							imgBox.appendChild(img);
+						}
+					});
+				}
+			} else {
+				document.getElementById('art-body').innerText = "文章不存在或已被移除。";
+			}
+		});
+	</script>
+</body>
+</html>
