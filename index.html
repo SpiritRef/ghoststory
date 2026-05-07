@@ -1,20 +1,16 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>鬼磕頭日誌 | 靈界紀實</title>
-	<link rel="icon" href="pic/GhostKowtow.jpg" type="image/jpeg">
-	<!-- 保持引用原本的 CSS 和 JS -->
-	<link rel="stylesheet" href="CSS/postFB.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>鬼磕頭日誌 | 靈界紀實</title>
+    <link rel="icon" href="pic/GhostKowtow.jpg" type="image/jpeg">
+    <link rel="stylesheet" href="CSS/postFB.css">
 </head>
 <body>
 
-<!-- 簡化後的浮動按鈕 -->
 <div class="expandable-menu-container" id="menuContainer">
-    <!-- 這裡變空的，由 JS 動態生成 -->
     <div class="menu-content" id="menuContent"></div>
-
     <button class="floating-service-btn" id="serviceBtn" onclick="toggleMenu()">
         <span id="serviceIcon">☰</span>
         <span id="serviceText">選單</span>
@@ -22,51 +18,55 @@
 </div>
 
 <div class="container">
-	<h1>📖 鬼磕頭紀實</h1>
-	<p style="text-align: center;">—— 穿梭陰陽，紀錄最真實的靈界對話 ——</p>
-	
-	<div class="search-group">
-		<input type="text" id="search" class="search-bar" placeholder="🔍 搜尋內容..." oninput="currentPage=1; updateDisplay()">
-		<button id="favToggle" class="filter-fav-btn" onclick="toggleFavFilter()">⭐ 收藏</button>
-	</div>
+    <h1>📖 鬼磕頭紀實</h1>
+    <p style="text-align: center;">—— 穿梭陰陽，紀錄最真實的靈界對話 ——</p>
+    
+    <div class="search-group">
+        <input type="text" id="search" class="search-bar" placeholder="🔍 搜尋內容..." oninput="currentPage=1; updateDisplay()">
+        <button id="favToggle" class="filter-fav-btn" onclick="toggleFavFilter()">⭐ 收藏</button>
+    </div>
 
-	<select id="titleFilter" class="search-bar" style="margin-top: -5px; background-color: #fff;" onchange="currentPage=1; updateDisplay()">
-		<option value="">📌 所有主題標題</option>
-	</select>
+    <select id="titleFilter" class="search-bar" style="margin-top: -5px; background-color: #fff;" onchange="currentPage=1; updateDisplay()">
+        <option value="">📌 所有主題標題</option>
+    </select>
 
-	<!-- 文章列表容器 -->
-	<div id="post-list"></div>
+    <div id="post-list">
+        <p style="text-align:center; padding:50px; color:#888;">正在載入資料...</p>
+    </div>
 </div>
 
 <div class="bottom-dock">
-	<div class="dock-container">
-		<div class="control-row">
-			<select id="sortOrder" class="control-select" onchange="updateDisplay()">
-				<option value="desc">最新更新 (倒序)</option>
-				<option value="asc">從頭開始 (順序)</option>
-			</select>
-			<select id="pageSize" class="control-select" onchange="currentPage=1; updateDisplay()">
-				<option value="5">每頁 5 筆</option>
-				<option value="10">每頁 10 筆</option>
-				<option value="20" selected>每頁 20 筆</option>
-				<option value="50">每頁 50 筆</option>
-				<option value="100">每頁 100 筆</option>
-				<option value="all">顯示全部</option>
-			</select>
-		</div>
-		<div class="pagination">
-			<button onclick="changePage(-1)" id="prevBtn" class="page-btn">上一頁</button>
-			<span id="pageNum" class="page-num-display">1 / 1</span>
-			<button onclick="changePage(1)" id="nextBtn" class="page-btn">下一頁</button>
-		</div>
-	</div>
+    <div class="dock-container">
+        <div class="control-row">
+            <select id="sortOrder" class="control-select" onchange="updateDisplay()">
+                <option value="desc">最新更新 (倒序)</option>
+                <option value="asc">從頭開始 (順序)</option>
+            </select>
+            <select id="pageSize" class="control-select" onchange="currentPage=1; updateDisplay()">
+                <option value="5">每頁 5 筆</option>
+                <option value="10">每頁 10 筆</option>
+                <option value="20" selected>每頁 20 筆</option>
+                <option value="all">顯示全部</option>
+            </select>
+        </div>
+        <div class="pagination">
+            <button onclick="changePage(-1)" id="prevBtn" class="page-btn">上一頁</button>
+            <span id="pageNum" class="page-num-display">1 / 1</span>
+            <button onclick="changePage(1)" id="nextBtn" class="page-btn">下一頁</button>
+        </div>
+    </div>
+</div>
+
+<div id="postModal" style="display:none;">
+    <div id="modal-header-title"></div>
+    <div id="modal-images"></div>
+    <div id="modal-body"></div>
 </div>
 
 <footer>
-	<p>&copy; 2026 鬼磕頭日誌 | 靈界紀實. All Rights Reserved.</p>
+    <p>&copy; 2026 鬼磕頭日誌 | 靈界紀實. All Rights Reserved.</p>
 </footer>
 
-<!-- 核心邏輯腳本 -->
 <script type="module" src="Javascript/postFB.js"></script>
 
 </body>
