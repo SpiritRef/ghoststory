@@ -11,10 +11,13 @@
 <body>
 
 <!-- 簡化後的浮動按鈕 -->
-<div class="expandable-menu-container">
-    <button class="floating-service-btn" onclick="toggleMenu()">
-        <span id="serviceIcon">📜</span>
-        <span id="serviceText">服務項目</span>
+<div class="expandable-menu-container" id="menuContainer">
+    <!-- 這裡變空的，由 JS 動態生成 -->
+    <div class="menu-content" id="menuContent"></div>
+
+    <button class="floating-service-btn" id="serviceBtn" onclick="toggleMenu()">
+        <span id="serviceIcon">☰</span>
+        <span id="serviceText">選單</span>
     </button>
 </div>
 
