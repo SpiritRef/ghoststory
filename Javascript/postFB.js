@@ -7,6 +7,7 @@ let favorites = JSON.parse(localStorage.getItem('novel_favs')) || [];
 let showOnlyFavs = false; 
 
 let API_URL = "";
+let JsonData = "";
 
 async function initApp() {
     const iniPath = 'settings/postFB.ini'; 
@@ -18,6 +19,7 @@ async function initApp() {
             API_URL = atob(config.API_URL);
             await loadData();
         }
+        if(config.JsonData) JsonData = config.JsonData;
     } else {
         console.error("無法載入 INI 設定");
     }
@@ -75,7 +77,7 @@ async function loadData() {
     } else {
         // 2. 如果沒有快取，嘗試讀取靜態目錄下的 JSON (當作預設資料)
         try {
-            const staticRes = await fetch('../Data/postFB.json');
+            const staticRes = await fetch(JsonData);
             if (staticRes.ok) {
                 const staticData = await staticRes.json();
                 allPosts = staticData;
