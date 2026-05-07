@@ -1,23 +1,22 @@
 /* ==========================================================================
-   1. 基礎佈局設定 (保持不變)
+   1. 基礎佈局設定 (原版)
    ========================================================================== */
 body { 
     font-family: -apple-system, system-ui, sans-serif; 
     background: #f0f2f5; 
     margin: 0; 
     padding: 10px 10px 140px 10px; 
-    line-height: 1.6;
 } 
 
 .container { width: 100%; max-width: 600px; margin: 0 auto; }
-h1 { font-size: 1.3rem; margin: 15px 0; color: #1c1e21; text-align: center; }
+h1 { font-size: 1.2rem; margin: 10px 0; color: #1c1e21; text-align: center; }
 
 /* ==========================================================================
-   2. 導航選單 (保持不變)
+   2. 導航選單 (新版：圓形按鈕 + INI 動態選單)
    ========================================================================== */
 .expandable-menu-container {
     position: fixed;
-    bottom: 120px;
+    bottom: 120px; /* 固定在右下角，避開底欄 */
     right: 15px;
     z-index: 3000;
     display: flex;
@@ -25,6 +24,7 @@ h1 { font-size: 1.3rem; margin: 15px 0; color: #1c1e21; text-align: center; }
     align-items: flex-end;
     gap: 10px;
 }
+
 .floating-service-btn {
     background: #1c1e21;
     color: #ffffff;
@@ -38,7 +38,12 @@ h1 { font-size: 1.3rem; margin: 15px 0; color: #1c1e21; text-align: center; }
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     cursor: pointer;
     transition: all 0.3s ease;
+    padding: 0;
 }
+
+.floating-service-btn:hover { transform: scale(1.1); background: #000; }
+#serviceText { display: none; } /* 隱藏文字，維持圓形 */
+
 .menu-content {
     display: none;
     flex-direction: column;
@@ -47,83 +52,111 @@ h1 { font-size: 1.3rem; margin: 15px 0; color: #1c1e21; text-align: center; }
     padding: 10px;
     border-radius: 12px;
     border: 1px solid #ffc107;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
     min-width: 130px;
 }
-.expandable-menu-container.show-menu .menu-content { display: flex; animation: fadeIn 0.3s ease; }
-.menu-item { color: white; text-decoration: none; display: flex; align-items: center; gap: 10px; padding: 10px 12px; font-size: 0.9rem; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.expandable-menu-container.show-menu .menu-content {
+    display: flex;
+    animation: fadeIn 0.3s ease;
+}
+
+.menu-item {
+    color: white;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    border-radius: 8px;
+}
+
+.menu-item:hover { background: rgba(255, 193, 7, 0.1); color: #ffc107; }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 
 /* ==========================================================================
-   3. 搜尋與過濾 (保持不變)
+   3. 搜尋列與過濾器 (原版排版)
    ========================================================================== */
 .search-group { display: flex; gap: 8px; margin-bottom: 10px; }
-.search-bar { width: 100%; padding: 12px 15px; font-size: 16px; border-radius: 20px; border: 1px solid #ddd; outline: none; box-sizing: border-box; }
-.filter-fav-btn { padding: 0 15px; border-radius: 20px; border: 1px solid #ddd; background: white; cursor: pointer; height: 46px; }
+.search-bar { 
+    width: 100%; padding: 12px 15px; font-size: 16px; border-radius: 20px; 
+    border: 1px solid #ddd; box-sizing: border-box; outline: none; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 15px; 
+}
+.search-group .search-bar { flex: 1; margin-bottom: 0; }
+.filter-fav-btn { 
+    padding: 0 15px; font-size: 14px; border-radius: 20px; border: 1px solid #ddd; 
+    background: white; color: #65676b; cursor: pointer; transition: all 0.3s; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05); white-space: nowrap; height: 46px; 
+}
 .filter-fav-btn.active { background: #ffc107; border-color: #ffc107; color: #000; font-weight: bold; }
+#titleFilter { 
+    padding-right: 40px !important; border-right: 20px solid transparent !important; 
+    margin-right: -35px !important; -webkit-appearance: menulist; appearance: menulist;
+}
 
 /* ==========================================================================
-   4. 文章列表與縮圖關鍵樣式 (重要修正)
+   4. 文章卡片與縮圖 (原版修正)
    ========================================================================== */
 .post-card { 
-    background: white; 
-    padding: 15px; 
-    margin-bottom: 12px; 
-    border-radius: 8px; 
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1); 
-    cursor: pointer; 
-    position: relative; 
+    background: white; padding: 15px; margin-bottom: 12px; border-radius: 8px; 
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1); cursor: pointer; position: relative; 
 }
-.fav-btn { position: absolute; top: 15px; right: 15px; cursor: pointer; font-size: 1.5em; color: #ccc; z-index: 10; }
-.fav-btn.active { color: #ffc107; }
-.post-date { color: #65676b; font-size: 0.85em; }
+.fav-btn { 
+    position: absolute; top: 15px; right: 15px; cursor: pointer; font-size: 1.5em; 
+    color: #ccc; transition: color 0.3s, transform 0.2s; user-select: none; z-index: 10; 
+}
+.fav-btn.active { color: #ffc107; transform: scale(1.1); }
+.post-date { color: #65676b; font-size: 0.8em; }
 .post-title { font-weight: bold; font-size: 1.1em; margin: 5px 0; color: #1c1e21; padding-right: 35px; }
-.post-content { color: #444; font-size: 1rem; line-height: 1.6; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+.post-content { 
+    color: #444; font-size: 16px; line-height: 1.8; overflow: hidden; 
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; margin-bottom: 10px; 
+}
 
-/* 縮圖容器樣式 - 確保橫向排列並有高度 */
 .thumb-img-container { 
-    display: flex !important; 
-    gap: 8px !important; 
-    overflow-x: auto; 
-    margin-top: 12px !important;
-    padding-bottom: 5px;
-    width: 100%;
+    display: flex; gap: 8px; flex-wrap: nowrap; overflow-x: auto; 
+    padding-bottom: 5px; width: 100%; 
 }
-
-/* 縮圖本體 - 強化顯示權重 */
 .thumb-img { 
-    width: 80px !important; 
-    height: 80px !important; 
-    object-fit: cover !important; 
-    border-radius: 8px !important; 
-    border: 1px solid #eee !important; 
-    flex-shrink: 0 !important;
-    display: block !important;
+    width: 80px !important; height: 80px !important; object-fit: cover; 
+    border-radius: 8px; border: 1px solid #eee; flex-shrink: 0; 
 }
-
-/* 隱藏無效圖片 */
-.thumb-img[src=""], .thumb-img:not([src]) { display: none !important; }
 
 /* ==========================================================================
-   5. 底部控制欄 (保持不變)
+   5. 底部控制欄 (原版)
    ========================================================================== */
-.bottom-dock { position: fixed; bottom: 0; left: 0; width: 100%; background: #ffffff; border-top: 1px solid #ddd; padding: 12px 0; z-index: 1000; }
+.bottom-dock { position: fixed; bottom: 0; left: 0; width: 100%; background: #ffffff; border-top: 1px solid #ddd; padding: 12px 0; z-index: 1000; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); }
 .dock-container { max-width: 600px; margin: 0 auto; padding: 0 15px; }
 .control-row { display: flex; gap: 8px; margin-bottom: 8px; }
-.control-select { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #ccc; font-size: 13px; }
+.control-select { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #ccc; background: #f9f9f9; font-size: 13px; cursor: pointer; }
 .pagination { display: flex; justify-content: space-between; align-items: center; }
-.page-btn { background: #1877f2; color: white; border: none; padding: 8px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; flex: 1; }
-.page-btn:disabled { background: #e4e6eb; color: #bcc0c4; }
-.page-num-display { flex: 1.5; text-align: center; font-size: 13px; color: #4b4f56; }
+.page-btn { background: #1877f2; color: white; border: none; padding: 8px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; flex: 1; }
+.page-btn:disabled { background: #e4e6eb; color: #bcc0c4; cursor: not-allowed; }
+.page-num-display { flex: 1.5; text-align: center; font-weight: bold; color: #4b4f56; font-size: 13px; white-space: pre-line; line-height: 1.3; }
 
 /* ==========================================================================
-   6. 獨立文章內容 (保持不變)
+   6. 獨立文章頁樣式 (article.html)
    ========================================================================== */
-.article-container { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 100px; }
+.article-container { 
+    background: #fff; padding: 20px; border-radius: 8px; 
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 100px; 
+}
 .full-img { width: 100%; max-width: 100%; display: block; margin: 15px auto; border-radius: 8px; }
 .full-content { font-size: 1.15em; line-height: 1.8; white-space: pre-wrap; word-wrap: break-word; color: #333; }
 .back-btn-top { display: inline-block; margin-bottom: 15px; color: #888; text-decoration: none; font-size: 0.9em; }
 
 /* ==========================================================================
-   7. 頁尾
+   7. 頁尾 (原版)
    ========================================================================== */
-footer { padding: 20px; text-align: center; color: #999; font-size: 0.75rem; }
+footer {
+    padding: 20px 20px 100px 20px; text-align: center; 
+    background-color: transparent; color: #999; font-size: 0.75rem; line-height: 1.4;
+}
+footer p { margin: 2px 0; }
+footer p:last-child { font-size: 0.7rem; opacity: 0.6; }
