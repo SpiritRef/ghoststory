@@ -12,7 +12,6 @@
 *   **自動化資料流**：利用 App Script 透過 GitHub Token 讀取並寫入最新 JSON 檔案，達成內容自動同步。
 *   **混合快取機制**：系統優先讀取 `LocalStorage` 緩存讓頁面秒開，同時在背景對比 GitHub 最新資料，確保內容不落後。
 *   **配置解耦**：選單內容與 API 網址皆儲存於 `settings/postFB.ini`，無需修改程式碼即可調整系統參數。
-*   **Base64 安全加密**：敏感的 API 介面地址採 Base64 編碼處理，增加基礎安全性。
 
 ---
 
@@ -24,10 +23,6 @@
 *   **分頁系統**：支援自定義每頁筆數 (20 / 50 / 100 / 全部)。
 *   **收藏系統**：透過 LocalStorage 紀錄喜愛文章，支援離線標記與「僅看收藏」過濾模式。
 *   **多媒體處理**：自動解析多圖欄位（支援換行或 `|` 分隔），具備自動防錯與隱藏失效圖片機制。
-
-### 後端同步
-*   **Google Apps Script**：負責處理資料轉換與推送至 GitHub。
-*   **ID 生成邏輯**：結合 `PostID` 與 `發佈日期` 生成唯一碼 `${pid}_${YYYYMMDDHHMMSS}`，確保 URL 的穩定性。
 
 ---
 
@@ -49,7 +44,7 @@
 若要更改系統配置，請編輯 `settings/postFB.ini`：
 ```ini
 # MENU_DATA 格式：顯示名稱,連結網址,圖示符號|...
-MENU_DATA=首頁,index.html,🏠|後台,inputData.html,🛠️
+MENU_DATA=服務項目,../services/,📜|返回列表,index.html,🏠|關於我,../services/about/,👤
 
 # API_URL 為 Base64 加密後的網址
 API_URL=YUhSMGNEb3ZMMlV1WVhCd0xtTnZiUzlzYVdkekxtcHpiMjQ9
