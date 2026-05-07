@@ -19,7 +19,7 @@ async function initApp() {
     const config = await getIni(iniPath);
     
     if (config) {
-        // 1. 初始化選單 (從 INI 讀取)
+        // 1. 初始化選單
         if (config.MENU_DATA) {
             initMenu(config.MENU_DATA);
         }
@@ -42,15 +42,18 @@ function initMenu(menuData) {
     if (!menuContent) return;
 
     const items = menuData.split('|');
-    menuContent.innerHTML = ''; // 清空靜態 HTML 預設內容
+    menuContent.innerHTML = ''; 
 
     items.forEach(item => {
-        const [text, link, icon] = item.split(',');
-        const a = document.createElement('a');
-        a.href = link;
-        a.className = 'menu-item';
-        a.innerHTML = `<span class="icon">${icon}</span> <span class="text">${text}</span>`;
-        menuContent.appendChild(a);
+        const parts = item.split(',');
+        if (parts.length >= 3) {
+            const [text, link, icon] = parts;
+            const a = document.createElement('a');
+            a.href = link;
+            a.className = 'menu-item';
+            a.innerHTML = `<span class="icon">${icon}</span> <span class="text">${text}</span>`;
+            menuContent.appendChild(a);
+        }
     });
 }
 
@@ -85,7 +88,7 @@ async function loadData() {
 }
 
 /**
- * 生成組合 ID (PostID_YYYYmmddHHMMSS)
+ * 生成組合 ID
  */
 function getCombinedId(post) {
     const pid = post["PostID"] || "0";
@@ -102,7 +105,7 @@ function getCombinedId(post) {
 }
 
 /**
- * 渲染文章列表
+ * 渲染文章列表 - 【已補回縮圖生成邏輯】
  */
 function renderList(posts) {
     const list = document.getElementById('post-list');
@@ -116,12 +119,28 @@ function renderList(posts) {
         const urlId = getCombinedId(post);
         const isFav = favorites.includes(urlId);
 
+        // --- 核心修正：處理圖片 HTML ---
+        const imgData = post["圖片網址"] || post["圖片"] || "";
+        let imgHtml = "";
+        if (imgData) {
+            imgHtml += `<div class="thumb-img-container">`;
+            // 抓取前三張圖片作為縮圖
+            imgData.split(/\r?\n|\|/).slice(0, 3).forEach(src => {
+                const cleanSrc = src.trim();
+                if(cleanSrc) {
+                    imgHtml += `<img src="${cleanSrc}" class="thumb-img" onerror="this.style.display='none'">`;
+                }
+            });
+            imgHtml += `</div>`;
+        }
+
         card.innerHTML = `
             <span class="fav-btn ${isFav ? 'active' : ''}" 
                   onclick="toggleFavorite('${urlId}', event)">${isFav ? '★' : '☆'}</span>
             <div class="post-date">${dateStr}</div>
             <div class="post-title">${post["標題"] || "無標題"}</div>
             <div class="post-content">${(post["貼文內容"] || "").substring(0, 60)}...</div>
+            ${imgHtml} 
         `;
 
         card.onclick = () => {
@@ -131,7 +150,7 @@ function renderList(posts) {
     });
 }
 
-// --- 以下為功能性函數，保持邏輯不變 ---
+// --- 其餘功能函數保持不變 ---
 
 function updateTitleDropdown() {
     const titleFilter = document.getElementById('titleFilter');
@@ -210,9 +229,6 @@ function toggleFavFilter() {
     updateDisplay();
 }
 
-/**
- * 修改：現在點擊右下角按鈕是展開選單，而不是直接跳轉
- */
 function toggleMenu() {
     const menu = document.getElementById('menuContainer');
     if (menu) {
@@ -220,7 +236,6 @@ function toggleMenu() {
     }
 }
 
-// 掛載到 window
 window.changePage = changePage;
 window.toggleFavorite = toggleFavorite;
 window.toggleFavFilter = toggleFavFilter;
