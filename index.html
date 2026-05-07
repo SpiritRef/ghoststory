@@ -5,36 +5,33 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>鬼磕頭日誌 | 靈界紀實</title>
 	<link rel="icon" href="pic/GhostKowtow.jpg" type="image/jpeg">
-	<script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+	<!-- 保持引用原本的 CSS 和 JS -->
 	<link rel="stylesheet" href="CSS/postFB.css">
 </head>
 <body>
-<div class="expandable-menu-container" id="menuContainer">
-    <!-- 展開後顯示的選單內容 -->
-    <div class="menu-content" id="menuContent">
-        <a href="../services/" class="menu-item">
-            <span class="icon">📜</span> <span class="text">服務項目</span>
-        </a>
-        <!-- 未來可以在這裡新增其他頁面 -->
-        <!-- <a href="../about/" class="menu-item"><span class="icon">👤</span> <span class="text">關於我</span></a> -->
-    </div>
 
-    <!-- 觸發按鈕 (平時是書，進入文章變 ☰) -->
-    <button class="floating-service-btn" id="serviceBtn" onclick="toggleMenu()">
+<!-- 簡化後的浮動按鈕 -->
+<div class="expandable-menu-container">
+    <button class="floating-service-btn" onclick="toggleMenu()">
         <span id="serviceIcon">📜</span>
         <span id="serviceText">服務項目</span>
     </button>
 </div>
+
 <div class="container">
 	<h1>📖 鬼磕頭紀實</h1>
 	<p style="text-align: center;">—— 穿梭陰陽，紀錄最真實的靈界對話 ——</p>
+	
 	<div class="search-group">
 		<input type="text" id="search" class="search-bar" placeholder="🔍 搜尋內容..." oninput="currentPage=1; updateDisplay()">
 		<button id="favToggle" class="filter-fav-btn" onclick="toggleFavFilter()">⭐ 收藏</button>
 	</div>
+
 	<select id="titleFilter" class="search-bar" style="margin-top: -5px; background-color: #fff;" onchange="currentPage=1; updateDisplay()">
 		<option value="">📌 所有主題標題</option>
 	</select>
+
+	<!-- 文章列表容器 -->
 	<div id="post-list"></div>
 </div>
 
@@ -46,12 +43,12 @@
 				<option value="asc">從頭開始 (順序)</option>
 			</select>
 			<select id="pageSize" class="control-select" onchange="currentPage=1; updateDisplay()">
-				<option value="5"          >每頁  5 筆</option>
-				<option value="10"         >每頁 10 筆</option>
+				<option value="5">每頁 5 筆</option>
+				<option value="10">每頁 10 筆</option>
 				<option value="20" selected>每頁 20 筆</option>
-				<option value="50"         >每頁 50 筆</option>
-				<option value="100"        >每頁 100 筆</option>
-				<option value="all"        >顯示全部</option>
+				<option value="50">每頁 50 筆</option>
+				<option value="100">每頁 100 筆</option>
+				<option value="all">顯示全部</option>
 			</select>
 		</div>
 		<div class="pagination">
@@ -62,22 +59,11 @@
 	</div>
 </div>
 
-<div id="postModal" class="modal" onclick="closeModal()">
-	<div class="modal-content" onclick="event.stopPropagation()">
-		<div class="modal-header">
-			<div id="modal-header-title" class="modal-header-title"></div>
-			<span class="close-btn" onclick="closeModal()">&times;</span>
-		</div>
-		<div class="modal-body-scroll">
-			<div id="modal-date" class="post-date"></div>
-			<div id="modal-images"></div>
-			<div id="modal-body" class="post-content" style="display:block; padding-top: 10px; font-size:1.15em; -webkit-line-clamp: unset;"></div>
-		</div>
-	</div>
-</div>
 <footer>
 	<p>&copy; 2026 鬼磕頭日誌 | 靈界紀實. All Rights Reserved.</p>
 </footer>
+
+<!-- 核心邏輯腳本 -->
 <script type="module" src="Javascript/postFB.js"></script>
 
 </body>
