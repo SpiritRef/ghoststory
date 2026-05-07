@@ -4,10 +4,24 @@ body { font-family: -apple-system, system-ui, sans-serif; background: #f0f2f5; m
 h1 { font-size: 1.2rem; margin: 10px 0; color: #1c1e21; text-align: center; }
 
 /* B方案：懸浮服務按鈕 */
-.floating-service-btn {position: fixed;top: 15px;right: 15px;z-index: 3000; background: rgba(28, 30, 33, 0.9); color: #ffffff;padding: 8px 16px;border-radius: 20px;text-decoration: none;font-size: 0.85rem;font-weight: bold;box-shadow: 0 4px 10px rgba(0,0,0,0.3);border: 1px solid #444;transition: all 0.3s ease;display: flex;align-items: center;gap: 5px;}
+.floating-service-btn {position: fixed;top: 15px;right: 15px;z-index: 3000; background: rgba(28, 30, 33, 0.9); color: #ffffff;padding: 8px 16px;border-radius: 20px;text-decoration: none;font-size: 0.85rem;font-weight: bold;box-shadow: 0 4px 10px rgba(0,0,0,0.3);border: 1px solid #444;transition: all 0.3s ease;display: flex;align-items: center;gap: 5px;transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);}
 
 .floating-service-btn:hover { background: #000000; transform: scale(1.05); box-shadow: 0 6px 15px rgba(0,0,0,0.4); color: #ffc107; }
-
+.floating-service-btn.minimized {
+    top: auto !important;     /* 覆蓋原本的 top: 15px */
+    right: 20px !important;
+    bottom: 110px !important; /* 移到右下角，避開底部控制欄 (bottom-dock) */
+    width: 44px;              /* 固定寬高變圓形 */
+    height: 44px;
+    padding: 0 !important;    /* 清除內距 */
+    border-radius: 50%;       /* 變圓形 */
+    justify-content: center;  /* 讓圖示置中 */
+    background: #1c1e21;      /* 稍微加深顏色 */
+    border: 2px solid #ffc107; /* 縮小時加個亮色邊框，讓它在深色背景下顯眼 */
+}
+.floating-service-btn.minimized span:not(.icon) {
+    display: none;
+}
 /* 避免在手機版擋到標題，可以稍微縮小 */
 @media (max-width: 480px) {.floating-service-btn { padding: 6px 12px;font-size: 0.75rem;top: 10px;right: 10px; }}
 
