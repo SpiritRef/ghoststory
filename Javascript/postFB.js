@@ -119,52 +119,47 @@ function updateDisplay() {
 /**
  * 渲染文章列表卡片
  */
+function getCombinedId(post) {
+    const pid = post["PostID"] || "0";
+    
+    let d = (typeof post["發佈日期"] === 'number') 
+            ? new Date((post["發佈日期"] - 25569) * 86400 * 1000) 
+            : new Date(post["發佈日期"]);
+            
+    if (isNaN(d.getTime())) return `${pid}_00000000000000`;
+
+    const pad = (n) => String(n).padStart(2, '0');
+    const ts = `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
+    
+    return `${pid}_${ts}`;
+}
+
 function renderList(posts) {
     const list = document.getElementById('post-list');
     list.innerHTML = '';
-    const fragment = document.createDocumentFragment();
-
+    
     posts.forEach(post => {
         const card = document.createElement('div');
         card.className = 'post-card';
         
-        const summary = (post["貼文內容"] || "").substring(0, 60) + "...";
-        const date = formatDate(post["發佈日期"]);
-        const imgData = post["圖片網址"] || post["圖片"] || "";
-        const id = post["ID"] || post["發佈日期"];
-        
-        const isFav = favorites.includes(id);
-        const favStar = `
-            <span class="fav-btn ${isFav ? 'active' : ''}" 
-                  onclick="toggleFavorite('${id}', event)">
-                  ${isFav ? '★' : '☆'}
-            </span>`;
-                    
-        let imgHtml = "";
-        if (imgData) {
-            imgHtml += `<div class="thumb-img-container">`;
-            imgData.split(/\r?\n|\|/).slice(0, 3).forEach(src => {
-                if(src.trim()) imgHtml += `<img src="${src.trim()}" class="thumb-img" onerror="this.style.display='none'">`;
-            });
-            imgHtml += `</div>`;
-        }
+        const dateStr = formatDate(post["發佈日期"]);
+        const urlId = getCombinedId(post); // 生成如 "391_20260506200400"
+        const isFav = favorites.includes(urlId);
 
         card.innerHTML = `
-            ${favStar}
-            <div class="post-date">${date}</div>
+            <span class="fav-btn ${isFav ? 'active' : ''}" 
+                  onclick="toggleFavorite('${urlId}', event)">${isFav ? '★' : '☆'}</span>
+            <div class="post-date">${dateStr}</div>
             <div class="post-title">${post["標題"] || "無標題"}</div>
-            <div class="post-content">${summary}</div>
-            ${imgHtml}
+            <div class="post-content">${(post["貼文內容"] || "").substring(0, 60)}...</div>
         `;
 
-        // 核心修改：點擊跳轉至獨立頁面並帶上參數
+        // 跳轉網址
         card.onclick = () => {
-            window.location.href = `article.html?id=${encodeURIComponent(id)}`;
+            window.location.href = `article.html?id=${urlId}`;
         };
-
-        fragment.appendChild(card);
+        list.appendChild(card);
     });
-    list.appendChild(fragment);
 }
 
 /**
