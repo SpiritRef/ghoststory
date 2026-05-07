@@ -51,36 +51,29 @@
 </footer>
 
 <script type="module">
-    import { getIni } from './API.js'; // 確保路徑正確
+    import { getIni } from './API.js';
 
+    // --- 關鍵修正 1：將此函數移到最上方，並立即掛載到全域 ---
     function toggleMenu() {
         const menu = document.getElementById('menuContainer');
-        if (menu) menu.classList.toggle('show-menu');
-    }
-    window.toggleMenu = toggleMenu;
-
-    // --- 新增：動態生成選單內容 ---
-    async function initMenu() {
-        const menuContent = document.getElementById('menuContent');
-        if (!menuContent) return;
-
-        const config = await getIni('settings/postFB.ini');
-        if (config && config.MENU_DATA) {
-            const items = config.MENU_DATA.split('|');
-            menuContent.innerHTML = ''; // 清空靜態預設內容
-
-            items.forEach(item => {
-                const [text, link, icon] = item.split(',');
-                const a = document.createElement('a');
-                a.href = link;
-                a.className = 'menu-item';
-                a.innerHTML = `<span class="icon">${icon}</span> <span class="text">${text}</span>`;
-                menuContent.appendChild(a);
-            });
+        if (menu) {
+            menu.classList.toggle('show-menu');
+        } else {
+            console.error("找不到 menuContainer 元素");
         }
     }
+    window.toggleMenu = toggleMenu; 
 
-    // 原有的格式化與 ID 邏輯...
+    // 格式化日期函數
+    function formatDate(raw) {
+        if (!raw) return "";
+        let d = (typeof raw === 'number') ? new Date((raw - 25569) * 86400 * 1000) : new Date(raw);
+        if (isNaN(d.getTime())) return raw;
+        const pad = (n) => String(n).padStart(2, '0');
+        return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    }
+
+    // 生成組合 ID
     function getCombinedId(post) {
         const pid = post["PostID"] || "0";
         let d = (typeof post["發佈日期"] === 'number') ? new Date((post["發佈日期"] - 25569) * 86400 * 1000) : new Date(post["發佈日期"]);
@@ -89,14 +82,45 @@
         return `${pid}_${ts}`;
     }
 
-    window.addEventListener('DOMContentLoaded', async () => {
-        // 先初始化選單
-        await initMenu();
+    // 動態生成選單內容
+    async function initMenu() {
+        const menuContent = document.getElementById('menuContent');
+        if (!menuContent) return;
 
-        // 處理文章渲染邏輯
+        try {
+            const config = await getIni('settings/postFB.ini');
+            if (config && config.MENU_DATA) {
+                const items = config.MENU_DATA.split('|');
+                menuContent.innerHTML = ''; 
+
+                items.forEach(item => {
+                    const parts = item.split(',');
+                    if (parts.length >= 3) {
+                        const [text, link, icon] = parts;
+                        const a = document.createElement('a');
+                        a.href = link;
+                        a.className = 'menu-item';
+                        a.innerHTML = `<span class="icon">${icon}</span> <span class="text">${text}</span>`;
+                        menuContent.appendChild(a);
+                    }
+                });
+            }
+        } catch (e) {
+            console.error("選單載入失敗:", e);
+        }
+    }
+
+    // 頁面進入點
+    window.addEventListener('DOMContentLoaded', async () => {
+        // 非同步執行選單初始化，但不阻塞後面的內容渲染
+        initMenu();
+
         const urlId = new URLSearchParams(window.location.search).get('id');
         const dataRaw = localStorage.getItem('cached_novel_data');
-        if (!urlId || !dataRaw) return;
+        if (!urlId || !dataRaw) {
+            document.getElementById('art-body').innerText = "找不到資料，請返回首頁。";
+            return;
+        }
 
         const allPosts = JSON.parse(dataRaw);
         const post = allPosts.find(p => getCombinedId(p) === urlId);
@@ -104,19 +128,24 @@
         if (post) {
             document.title = `${post["標題"]} | 鬼磕頭日誌`;
             document.getElementById('art-title').innerText = post["標題"];
+            document.getElementById('art-date').innerText = formatDate(post["發佈日期"]);
             document.getElementById('art-body').innerText = post["貼文內容"];
-            // 處理圖片...
+            
             const imgData = post["圖片網址"] || post["圖片"] || "";
             if (imgData) {
                 const imgBox = document.getElementById('art-images');
+                imgBox.innerHTML = '';
                 imgData.split(/\r?\n|\|/).forEach(src => {
                     if(src.trim()) {
                         const img = document.createElement('img');
-                        img.src = src.trim(); img.className = 'full-img';
+                        img.src = src.trim(); 
+                        img.className = 'full-img';
                         imgBox.appendChild(img);
                     }
                 });
             }
+        } else {
+            document.getElementById('art-title').innerText = "文章不存在";
         }
     });
 </script>
