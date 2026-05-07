@@ -223,7 +223,29 @@ h1 {
     word-wrap: break-word; 
     color: #333; 
 }
+/* 文章內圖片縮圖容器 */
+.thumb-img-container { 
+    display: flex; 
+    gap: 8px; 
+    overflow-x: auto; /* 若圖片多，可橫向捲動 */
+    margin-top: 10px;
+    padding-bottom: 5px;
+}
 
+/* 縮圖本體樣式 */
+.thumb-img { 
+    width: 80px !important; 
+    height: 80px !important; 
+    object-fit: cover; 
+    border-radius: 8px; 
+    border: 1px solid #eee; 
+    flex-shrink: 0;
+}
+
+/* 隱藏失效的圖片 */
+.thumb-img[src=""], .thumb-img:not([src]) {
+    display: none;
+}
 .back-btn-top { display: inline-block; margin-bottom: 15px; color: #888; text-decoration: none; font-size: 0.9em; }
 
 /* ==========================================================================
