@@ -8,23 +8,12 @@ let showOnlyFavs = false;
 
 let API_URL = "";
 
-// 取得選單與按鈕元素
-const menuContainer = document.getElementById('menuContainer');
-
-/**
- * 初始化應用程式
- */
 async function initApp() {
     const iniPath = 'settings/postFB.ini'; 
     const config = await getIni(iniPath);
     
     if (config) {
-        // 1. 初始化選單
-        if (config.MENU_DATA) {
-            initMenu(config.MENU_DATA);
-        }
-
-        // 2. 初始化資料 API
+        if (config.MENU_DATA) initMenu(config.MENU_DATA);
         if (config.API_URL) {
             API_URL = atob(config.API_URL);
             await loadData();
@@ -34,16 +23,11 @@ async function initApp() {
     }
 }
 
-/**
- * 動態生成選單內容
- */
 function initMenu(menuData) {
     const menuContent = document.getElementById('menuContent');
     if (!menuContent) return;
-
     const items = menuData.split('|');
     menuContent.innerHTML = ''; 
-
     items.forEach(item => {
         const parts = item.split(',');
         if (parts.length >= 3) {
@@ -57,25 +41,17 @@ function initMenu(menuData) {
     });
 }
 
-/**
- * 載入資料
- */
 async function loadData() {
     const list = document.getElementById('post-list');
     const localData = localStorage.getItem('cached_novel_data');
-    
     if (localData) {
         allPosts = JSON.parse(localData);
         updateTitleDropdown();
         updateDisplay();
-    } else {
-        list.innerHTML = '<div style="text-align:center; padding:50px; color:#888;">正在載入小說資料...</div>';
     }
-
     try {
         const res = await fetch(API_URL);
         const newData = await res.json();
-        
         if (JSON.stringify(newData) !== localData) {
             allPosts = newData;
             localStorage.setItem('cached_novel_data', JSON.stringify(newData));
@@ -87,26 +63,16 @@ async function loadData() {
     }
 }
 
-/**
- * 生成組合 ID
- */
 function getCombinedId(post) {
     const pid = post["PostID"] || "0";
     let d = (typeof post["發佈日期"] === 'number') 
             ? new Date((post["發佈日期"] - 25569) * 86400 * 1000) 
             : new Date(post["發佈日期"]);
-            
     if (isNaN(d.getTime())) return `${pid}_00000000000000`;
-
     const pad = (n) => String(n).padStart(2, '0');
-    const ts = `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
-    
-    return `${pid}_${ts}`;
+    return `${pid}_${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
 }
 
-/**
- * 渲染文章列表 - 【已補回縮圖生成邏輯】
- */
 function renderList(posts) {
     const list = document.getElementById('post-list');
     list.innerHTML = '';
@@ -119,12 +85,12 @@ function renderList(posts) {
         const urlId = getCombinedId(post);
         const isFav = favorites.includes(urlId);
 
-        // --- 核心修正：處理圖片 HTML ---
-        const imgData = post["圖片網址"] || post["圖片"] || "";
+        // 圖片解析 (核心防錯)
+        let imgData = post["圖片網址"] || post["圖片"] || "";
         let imgHtml = "";
-        if (imgData) {
-            imgHtml += `<div class="thumb-img-container">`;
-            // 抓取前三張圖片作為縮圖
+
+        if (typeof imgData === 'string' && imgData.trim() !== "") {
+            imgHtml = `<div class="thumb-img-container">`;
             imgData.split(/\r?\n|\|/).slice(0, 3).forEach(src => {
                 const cleanSrc = src.trim();
                 if(cleanSrc) {
@@ -150,8 +116,6 @@ function renderList(posts) {
     });
 }
 
-// --- 其餘功能函數保持不變 ---
-
 function updateTitleDropdown() {
     const titleFilter = document.getElementById('titleFilter');
     if (!titleFilter) return;
@@ -165,10 +129,10 @@ function updateTitleDropdown() {
 }
 
 function updateDisplay() {
-    const term = document.getElementById('search').value.toLowerCase();
-    const selectedTitle = document.getElementById('titleFilter').value; 
-    const order = document.getElementById('sortOrder').value;
-    const sizeValue = document.getElementById('pageSize').value;
+    const term = document.getElementById('search')?.value.toLowerCase() || "";
+    const selectedTitle = document.getElementById('titleFilter')?.value || ""; 
+    const order = document.getElementById('sortOrder')?.value || "desc";
+    const sizeValue = document.getElementById('pageSize')?.value || "20";
     
     filteredPosts = allPosts.filter(p => {
         const content = (p["貼文內容"] || "").toLowerCase();
@@ -191,9 +155,8 @@ function updateDisplay() {
     const start = (currentPage - 1) * pageSize;
     const pagedData = filteredPosts.slice(start, start + pageSize);
 
-    document.getElementById('pageNum').innerText = `${currentPage} / ${maxPage}\n共 ${filteredPosts.length} 筆`;
-    document.getElementById('prevBtn').disabled = (currentPage === 1);
-    document.getElementById('nextBtn').disabled = (currentPage === maxPage);
+    const pageNumEl = document.getElementById('pageNum');
+    if(pageNumEl) pageNumEl.innerText = `${currentPage} / ${maxPage}\n共 ${filteredPosts.length} 筆`;
     renderList(pagedData);
 }
 
@@ -223,17 +186,17 @@ function toggleFavorite(postId, event) {
 function toggleFavFilter() {
     showOnlyFavs = !showOnlyFavs;
     const btn = document.getElementById('favToggle');
-    btn.classList.toggle('active');
-    btn.innerText = showOnlyFavs ? '⭐ 顯示全部' : '⭐ 收藏';
+    if(btn) {
+        btn.classList.toggle('active');
+        btn.innerText = showOnlyFavs ? '⭐ 顯示全部' : '⭐ 收藏';
+    }
     currentPage = 1;
     updateDisplay();
 }
 
 function toggleMenu() {
     const menu = document.getElementById('menuContainer');
-    if (menu) {
-        menu.classList.toggle('show-menu');
-    }
+    if (menu) menu.classList.toggle('show-menu');
 }
 
 window.changePage = changePage;
