@@ -51,50 +51,72 @@
 </footer>
 
 <script type="module">
-    // 必須與列表頁使用完全相同的轉換邏輯
+    import { getIni } from './API.js'; // 確保路徑正確
+
+    function toggleMenu() {
+        const menu = document.getElementById('menuContainer');
+        if (menu) menu.classList.toggle('show-menu');
+    }
+    window.toggleMenu = toggleMenu;
+
+    // --- 新增：動態生成選單內容 ---
+    async function initMenu() {
+        const menuContent = document.getElementById('menuContent');
+        if (!menuContent) return;
+
+        const config = await getIni('settings/postFB.ini');
+        if (config && config.MENU_DATA) {
+            const items = config.MENU_DATA.split('|');
+            menuContent.innerHTML = ''; // 清空靜態預設內容
+
+            items.forEach(item => {
+                const [text, link, icon] = item.split(',');
+                const a = document.createElement('a');
+                a.href = link;
+                a.className = 'menu-item';
+                a.innerHTML = `<span class="icon">${icon}</span> <span class="text">${text}</span>`;
+                menuContent.appendChild(a);
+            });
+        }
+    }
+
+    // 原有的格式化與 ID 邏輯...
     function getCombinedId(post) {
         const pid = post["PostID"] || "0";
-        let d = (typeof post["發佈日期"] === 'number') 
-                ? new Date((post["發佈日期"] - 25569) * 86400 * 1000) 
-                : new Date(post["發佈日期"]);
-        if (isNaN(d.getTime())) return `${pid}_00000000000000`;
+        let d = (typeof post["發佈日期"] === 'number') ? new Date((post["發佈日期"] - 25569) * 86400 * 1000) : new Date(post["發佈日期"]);
         const pad = (n) => String(n).padStart(2, '0');
         const ts = `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
         return `${pid}_${ts}`;
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', async () => {
+        // 先初始化選單
+        await initMenu();
+
+        // 處理文章渲染邏輯
         const urlId = new URLSearchParams(window.location.search).get('id');
         const dataRaw = localStorage.getItem('cached_novel_data');
-
         if (!urlId || !dataRaw) return;
 
         const allPosts = JSON.parse(dataRaw);
-        
-        // 尋找符合組合 ID 的那一筆
         const post = allPosts.find(p => getCombinedId(p) === urlId);
 
         if (post) {
             document.title = `${post["標題"]} | 鬼磕頭日誌`;
             document.getElementById('art-title').innerText = post["標題"];
-            document.getElementById('art-date').innerText = post["發佈日期"]; // 或使用格式化函數
             document.getElementById('art-body').innerText = post["貼文內容"];
-            
-            // 處理圖片 (以此類推)
+            // 處理圖片...
             const imgData = post["圖片網址"] || post["圖片"] || "";
             if (imgData) {
                 const imgBox = document.getElementById('art-images');
                 imgData.split(/\r?\n|\|/).forEach(src => {
                     if(src.trim()) {
                         const img = document.createElement('img');
-                        img.src = src.trim();
-                        img.className = 'full-img';
+                        img.src = src.trim(); img.className = 'full-img';
                         imgBox.appendChild(img);
                     }
                 });
             }
-        } else {
-            document.getElementById('art-title').innerText = "文章不存在";
         }
     });
 </script>
