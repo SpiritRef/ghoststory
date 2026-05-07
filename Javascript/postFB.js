@@ -41,26 +41,74 @@ function initMenu(menuData) {
     });
 }
 
+// async function loadData() {
+//     const list = document.getElementById('post-list');
+//     const localData = localStorage.getItem('cached_novel_data');
+//     if (localData) {
+//         allPosts = JSON.parse(localData);
+//         updateTitleDropdown();
+//         updateDisplay();
+//     }
+//     try {
+//         const res = await fetch(API_URL);
+//         const newData = await res.json();
+//         if (JSON.stringify(newData) !== localData) {
+//             allPosts = newData;
+//             localStorage.setItem('cached_novel_data', JSON.stringify(newData));
+//             updateTitleDropdown();
+//             updateDisplay();
+//         }
+//     } catch (e) {
+//         console.error("更新失敗", e);
+//     }
+// }
 async function loadData() {
     const list = document.getElementById('post-list');
-    const localData = localStorage.getItem('cached_novel_data');
-    if (localData) {
-        allPosts = JSON.parse(localData);
-        updateTitleDropdown();
-        updateDisplay();
+    
+    // --- 第一階段：快取/本地讀取 (秒開) ---
+    const localCache = localStorage.getItem('cached_novel_data');
+    
+    if (localCache) {
+        // 1. 如果 localStorage 有資料，先用它的
+        allPosts = JSON.parse(localCache);
+        refreshUI();
+    } else {
+        // 2. 如果沒有快取，嘗試讀取靜態目錄下的 JSON (當作預設資料)
+        try {
+            const staticRes = await fetch('../Data/postFB.json');
+            if (staticRes.ok) {
+                const staticData = await staticRes.json();
+                allPosts = staticData;
+                refreshUI();
+            }
+        } catch (e) {
+            console.log("本地無預設資料，等待 API...");
+        }
     }
+
+    // --- 第二階段：非同步請求最新資料 (背景更新) ---
     try {
         const res = await fetch(API_URL);
+        if (!res.ok) throw new Error("API 請求失敗");
+        
         const newData = await res.json();
-        if (JSON.stringify(newData) !== localData) {
+        
+        // 檢查新資料是否跟目前顯示的資料不同
+        if (JSON.stringify(newData) !== JSON.stringify(allPosts)) {
+            console.log("發現新內容，正在更新...");
             allPosts = newData;
             localStorage.setItem('cached_novel_data', JSON.stringify(newData));
-            updateTitleDropdown();
-            updateDisplay();
+            refreshUI(); // 靜默更新 UI
         }
     } catch (e) {
-        console.error("更新失敗", e);
+        console.error("背景更新失敗", e);
     }
+}
+
+// 提取重複的更新邏輯
+function refreshUI() {
+    updateTitleDropdown();
+    updateDisplay();
 }
 
 function getCombinedId(post) {
