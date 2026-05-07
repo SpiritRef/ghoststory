@@ -9,9 +9,22 @@
 	<link rel="stylesheet" href="CSS/postFB.css">
 </head>
 <body>
-<a href="../services/" class="floating-service-btn">
-    📜 服務項目
-</a>
+<div class="expandable-menu-container" id="menuContainer">
+    <!-- 展開後顯示的選單內容 -->
+    <div class="menu-content" id="menuContent">
+        <a href="../services/" class="menu-item">
+            <span class="icon">📜</span> <span class="text">服務項目</span>
+        </a>
+        <!-- 未來可以在這裡新增其他頁面 -->
+        <!-- <a href="../about/" class="menu-item"><span class="icon">👤</span> <span class="text">關於我</span></a> -->
+    </div>
+
+    <!-- 觸發按鈕 (平時是書，進入文章變 ☰) -->
+    <button class="floating-service-btn" id="serviceBtn" onclick="toggleMenu()">
+        <span id="serviceIcon">📜</span>
+        <span id="serviceText">服務項目</span>
+    </button>
+</div>
 <div class="container">
 	<h1>📖 鬼磕頭紀實</h1>
 	<p style="text-align: center;">—— 穿梭陰陽，紀錄最真實的靈界對話 ——</p>
