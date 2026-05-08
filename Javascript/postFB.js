@@ -11,17 +11,19 @@ let JsonData = "";
 
 async function initApp() {
     const iniPath = 'settings/postFB.ini';
-    const dataPromise = loadData(); 
-    const config = await getIni(iniPath);
+    const config = await getIni(iniPath); // 先拿到設定檔
     
     if (config) {
         if (config.MENU_DATA) initMenu(config.MENU_DATA);
+        if (config.JsonData) JsonData = config.JsonData; // 💡 先賦值路徑
+        
+        // 💡 賦值後再啟動 loadData
+        loadData(); 
+
         if (config.API_URL) {
             API_URL = atob(config.API_URL);
-            // 💡 當 INI 解析出 API_URL 後，再告訴 loadData 可以去抓遠端更新了
             window.dispatchEvent(new CustomEvent('apiUrlReady', { detail: API_URL }));
         }
-        if(config.JsonData) JsonData = config.JsonData;
     } else {
         console.error("無法載入 INI 設定");
     }
