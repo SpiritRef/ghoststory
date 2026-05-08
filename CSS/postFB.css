@@ -5,7 +5,8 @@ body {
     font-family: -apple-system, system-ui, "Microsoft JhengHei", sans-serif; 
     background: #f0f2f5; 
     margin: 0; 
-    padding: 10px 10px 160px 10px; /* 預留底部 Dock 空間 */
+    /* 增加底部 padding 確保內容不被 Dock 擋住 */
+    padding: 10px 10px 180px 10px; 
     -webkit-tap-highlight-color: transparent;
 } 
 
@@ -17,7 +18,7 @@ h1 { font-size: 1.2rem; margin: 10px 0; color: #1c1e21; text-align: center; }
    ========================================================================== */
 .expandable-menu-container {
     position: fixed;
-    bottom: 130px; 
+    bottom: 150px; /* 提高一點避開底部導航 */
     right: 15px;
     z-index: 3000;
     display: flex;
@@ -116,7 +117,6 @@ h1 { font-size: 1.2rem; margin: 10px 0; color: #1c1e21; text-align: center; }
     display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; margin-bottom: 10px; 
 }
 
-/* 縮圖容器 */
 .thumb-img-container { 
     display: flex; gap: 8px; flex-wrap: nowrap; overflow-x: auto; 
     padding-bottom: 5px; width: 100%; 
@@ -127,27 +127,73 @@ h1 { font-size: 1.2rem; margin: 10px 0; color: #1c1e21; text-align: center; }
 }
 
 /* ==========================================================================
-   5. 底部固定控制欄 (Dock) 與 跳頁功能
+   5. 底部固定控制欄 (Dock) 與 跳頁功能 (優化版)
    ========================================================================= */
 .bottom-dock { 
-    position: fixed; bottom: 0; left: 0; width: 100%; background: #ffffff; 
-    border-top: 1px solid #ddd; padding: 12px 0 env(safe-area-inset-bottom); 
-    z-index: 2000; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); 
+    position: fixed; 
+    bottom: 0; 
+    left: 0; 
+    width: 100%; 
+    background: #ffffff; 
+    border-top: 1px solid #ddd; 
+    /* 核心修改：增加下方的安全間距，確保不碰到螢幕邊緣 */
+    padding: 15px 0 calc(15px + env(safe-area-inset-bottom)); 
+    z-index: 2000; 
+    box-shadow: 0 -4px 15px rgba(0,0,0,0.08); 
 }
-.dock-container { max-width: 600px; margin: 0 auto; padding: 0 15px; }
-.control-row { display: flex; gap: 8px; margin-bottom: 8px; }
-.control-select { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #ccc; background: #f9f9f9; font-size: 13px; cursor: pointer; }
 
-.pagination { display: flex; justify-content: space-between; align-items: center; gap: 5px; }
-.page-btn { 
-    background: #1877f2; color: white; border: none; padding: 8px 15px; 
-    border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; flex: 1;
+.dock-container { max-width: 600px; margin: 0 auto; padding: 0 15px; }
+
+.control-row { display: flex; gap: 8px; margin-bottom: 12px; }
+
+.control-select { 
+    flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #ccc; 
+    background: #f9f9f9; font-size: 13px; cursor: pointer; 
 }
+
+.pagination { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    gap: 15px; /* 增加元件間距 */
+}
+
+.page-btn { 
+    background: #1877f2; 
+    color: white; 
+    border: none; 
+    padding: 10px 12px; 
+    border-radius: 8px; 
+    font-weight: bold; 
+    cursor: pointer; 
+    font-size: 14px; 
+    /* 修改：不強制佔滿，改為彈性固定寬度 */
+    flex: 0 1 100px; 
+    text-align: center;
+}
+
 .page-btn:disabled { background: #e4e6eb; color: #bcc0c4; cursor: not-allowed; }
 
-/* 跳頁與頁碼樣式 */
-.page-info-group { flex: 2; display: flex; justify-content: center; align-items: center; gap: 5px; font-size: 13px; font-weight: bold; color: #4b4f56; }
-.jump-select { border: 1px solid #ccc; background: #fff; padding: 2px 4px; border-radius: 4px; color: #1877f2; }
+.page-info-group { 
+    flex: 1; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    gap: 8px; 
+    font-size: 13px; 
+    font-weight: bold; 
+    color: #4b4f56; 
+    white-space: nowrap;
+}
+
+.jump-select { 
+    border: 1px solid #ccc; 
+    background: #fff; 
+    padding: 4px 8px; 
+    border-radius: 6px; 
+    color: #1877f2; 
+    font-weight: bold;
+}
 
 /* ==========================================================================
    6. 獨立文章頁樣式 (article.html)
@@ -164,7 +210,7 @@ h1 { font-size: 1.2rem; margin: 10px 0; color: #1c1e21; text-align: center; }
    7. 頁尾
    ========================================================================== */
 footer {
-    padding: 20px 20px 120px 20px; text-align: center; 
+    padding: 20px 20px 140px 20px; text-align: center; 
     background-color: transparent; color: #999; font-size: 0.75rem; line-height: 1.4;
 }
 footer p { margin: 2px 0; }
@@ -174,13 +220,15 @@ footer p:last-child { font-size: 0.7rem; opacity: 0.6; }
    8. 📱 手機 RWD 優化
    ========================================================================== */
 @media (max-width: 480px) {
+    body { padding-bottom: 200px; }
     .search-group { flex-direction: column; gap: 10px; }
     .filter-fav-btn { width: 100%; height: 48px; }
     .search-bar { margin-bottom: 10px; }
     
-    .pagination { gap: 3px; }
-    .page-btn { padding: 10px 5px; font-size: 13px; }
-    .page-info-group { font-size: 12px; }
+    .pagination { gap: 10px; }
+    .page-btn { flex: 0 1 85px; padding: 12px 5px; font-size: 13px; }
+    .page-info-group { font-size: 11px; gap: 4px; }
+    .jump-select { padding: 4px 6px; }
 }
 
 @keyframes fadeIn {
