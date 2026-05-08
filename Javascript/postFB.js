@@ -222,7 +222,7 @@ function renderList(posts) {
         `;
 
         card.onclick = () => {
-            window.location.href = `article.html?id=${urlId}`;
+            window.location.href = `article/?id=${urlId}`;
         };
         list.appendChild(card);
     });
