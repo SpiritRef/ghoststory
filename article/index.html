@@ -7,7 +7,6 @@
     <link rel="icon" href="../pic/GhostKowtow.jpg" type="image/jpeg">
     <link rel="stylesheet" href="../CSS/postFB.css">
     <style>
-        /* 文章頁專用樣式 (RWD 強化) */
         body { background: #f0f2f5; margin: 0; padding: 0; overflow-x: hidden; }
         .article-container { 
             width: 95%; max-width: 800px; margin: 20px auto 120px auto; 
@@ -39,11 +38,11 @@
 <div class="container article-container">
     <a href="../index.html" class="back-btn-top">← 返回列表</a>
     <div id="art-date" class="post-date" style="color: #65676b; font-size: 0.85rem;"></div>
-    <h1 id="art-title">正在加載中...</h1>
+    <h1 id="art-title">正在讀取內容...</h1>
     <hr style="border: 0; border-top: 1px solid #eee;">
     <div id="art-images"></div>
     <div id="art-body" class="full-content">
-        <div class="loading-hint">正在讀取日誌內容...</div>
+        <div class="loading-hint">正在感應靈界紀錄...</div>
     </div>
 </div>
 
@@ -52,7 +51,6 @@
 </footer>
 
 <script type="module">
-    // 💡 修正 API 路徑：向上跳兩層
     import { getIni } from '../Javascript/API.js';
 
     window.toggleMenu = function() {
@@ -85,45 +83,60 @@
             return;
         }
 
+        // --- 第一步：先讀快取 (最快) ---
         const cached = localStorage.getItem('cached_novel_data');
-        if (cached) renderPost(JSON.parse(cached), targetId);
+        if (cached) {
+            console.log("使用快取渲染");
+            renderPost(JSON.parse(cached), targetId);
+        }
 
         try {
-            // 💡 修正 INI 路徑：向上跳一層
             const config = await getIni('../settings/postFB.ini');
             if (!config) return;
 
             if (config.MENU_DATA) renderMenu(config.MENU_DATA);
 
-            const apiAddr = config.API_URL ? atob(config.API_URL) : "";
+            // --- 第二步：立即嘗試讀取 JSON (當快取無資料或作為備援) ---
             const jsonPath = "../" + config.JsonData;
-
-            if (!document.getElementById('art-title').innerText || document.getElementById('art-title').innerText.includes("正在召喚")) {
+            try {
                 const staticRes = await fetch(jsonPath);
                 if (staticRes.ok) {
                     const staticData = await staticRes.json();
+                    console.log("使用 JSON 同步");
                     renderPost(staticData, targetId);
                 }
-            }
+            } catch(e) { console.warn("JSON 載入失敗"); }
 
+            // --- 第三步：背景同步 API (保證最新) ---
+            const apiAddr = config.API_URL ? atob(config.API_URL) : "";
             if (apiAddr) {
                 const res = await fetch(apiAddr);
                 if (res.ok) {
                     const newData = await res.json();
+                    console.log("使用 API 最終同步");
                     localStorage.setItem('cached_novel_data', JSON.stringify(newData));
                     renderPost(newData, targetId);
                 }
             }
-        } catch (e) { console.error("載入失敗:", e); }
+        } catch (e) { 
+            console.error("載入流程異常:", e); 
+        }
     }
 
     function renderPost(data, id) {
         const post = data.find(p => getCombinedId(p) === id);
         if (post) {
+            // 更新內容，若標題相同則不重刷圖片以免閃爍
+            if (document.getElementById('art-title').innerText === post["標題"]) {
+                document.getElementById('art-body').innerText = post["貼文內容"];
+                return; 
+            }
+
             document.title = `${post["標題"]} | 鬼磕頭日誌`;
             document.getElementById('art-title').innerText = post["標題"];
             document.getElementById('art-date').innerText = formatDate(post["發佈日期"]);
             document.getElementById('art-body').innerText = post["貼文內容"];
+            
             const imgBox = document.getElementById('art-images');
             imgBox.innerHTML = '';
             const imgData = post["圖片網址"] || post["圖片"] || "";
@@ -131,7 +144,9 @@
                 imgData.split(/\r?\n|\|/).forEach(src => {
                     if(src.trim()) {
                         const img = document.createElement('img');
-                        img.src = "../" + src.trim(); 
+                        // 💡 修正圖片路徑：同樣需要向上跳一階
+                        const cleanSrc = src.trim();
+                        img.src = cleanSrc.startsWith('http') ? cleanSrc : "../" + cleanSrc; 
                         img.className = 'full-img';
                         imgBox.appendChild(img);
                     }
@@ -149,7 +164,6 @@
             if (parts.length >= 3) {
                 const [text, link, icon] = parts;
                 const a = document.createElement('a');
-                // 💡 這裡的 link 在 INI 裡如果是相對列表頁的，可能也需要處理
                 a.href = link; 
                 a.className = 'menu-item';
                 a.innerHTML = `<span class="icon">${icon}</span> <span class="text">${text}</span>`;
