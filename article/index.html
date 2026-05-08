@@ -130,7 +130,7 @@
             if (imgData) {
                 imgData.split(/\r?\n|\|/).forEach(src => {
                     if(src.trim()) {
-                        const img = document.createElement('img');
+                        const img =  "../" + document.createElement('img');
                         img.src = src.trim(); 
                         img.className = 'full-img';
                         imgBox.appendChild(img);
