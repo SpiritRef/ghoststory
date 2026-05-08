@@ -16,9 +16,33 @@
         .full-img { width: 100%; max-width: 100%; height: auto; display: block; margin: 20px auto; border-radius: 8px; }
         .full-content { font-size: 1.1rem; line-height: 1.8; white-space: pre-wrap; word-wrap: break-word; color: #333; margin-top: 20px; }
         h1#art-title { font-size: 1.5rem; line-height: 1.4; color: #1c1e21; margin: 15px 0; }
-        .back-btn-top { display: inline-block; margin-bottom: 20px; color: #1877f2; text-decoration: none; font-size: 0.95rem; font-weight: bold; }
-        .back-btn-top { display: inline-flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: #1c1e21;  text-decoration: none; font-size: 0.95rem; font-weight: bold; margin-bottom: 20px; transition: all 0.3s ease;}
-        .back-btn-top:hover { background: rgba(0, 0, 0, 0.05); /* 輕微灰色背景，讓黃字更明顯 */color: #ffc107; }
+        
+        /* 💡 返回列表按鈕樣式與 menu-item 配色同步 */
+        .back-btn-top { 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 10px; 
+            padding: 10px 12px; 
+            border-radius: 8px; 
+            color: #1c1e21; 
+            text-decoration: none; 
+            font-size: 0.95rem; 
+            font-weight: bold; 
+            margin-bottom: 20px; 
+            transition: all 0.3s ease;
+        }
+        .back-btn-top:hover { 
+            background: rgba(255, 193, 7, 0.1); 
+            color: #ffc107; 
+        }
+
+        /* 💡 選單圖示加大 */
+        #serviceIcon {
+            font-size: 150%;
+            line-height: 1;
+            display: inline-block;
+        }
+
         .loading-hint { text-align: center; color: #888; padding: 100px 20px; font-style: italic; }
 
         @media (max-width: 600px) {
@@ -38,7 +62,7 @@
 </div>
     
 <div class="container article-container">
-    <!-- 💡 已更新：返回按鈕現在符合 menu-item 的配色與佈局 -->
+    <!-- 💡 返回按鈕結構優化以支援 gap 佈局 -->
     <a href="../index.html" class="back-btn-top">
         <span>⬅</span>
         <span>返回列表</span>
@@ -90,7 +114,6 @@
             return;
         }
 
-        // --- 第一步：先讀快取 (最快) ---
         const cached = localStorage.getItem('cached_novel_data');
         if (cached) {
             console.log("使用快取渲染");
@@ -103,7 +126,6 @@
 
             if (config.MENU_DATA) renderMenu(config.MENU_DATA);
 
-            // --- 第二步：立即嘗試讀取 JSON (當快取無資料或作為備援) ---
             const jsonPath = "../" + config.JsonData;
             try {
                 const staticRes = await fetch(jsonPath);
@@ -114,7 +136,6 @@
                 }
             } catch(e) { console.warn("JSON 載入失敗"); }
 
-            // --- 第三步：背景同步 API (保證最新) ---
             const apiAddr = config.API_URL ? atob(config.API_URL) : "";
             if (apiAddr) {
                 const res = await fetch(apiAddr);
@@ -133,7 +154,6 @@
     function renderPost(data, id) {
         const post = data.find(p => getCombinedId(p) === id);
         if (post) {
-            // 更新內容，若標題相同則不重刷圖片以免閃爍
             if (document.getElementById('art-title').innerText === post["標題"]) {
                 document.getElementById('art-body').innerText = post["貼文內容"];
                 return; 
@@ -151,7 +171,6 @@
                 imgData.split(/\r?\n|\|/).forEach(src => {
                     if(src.trim()) {
                         const img = document.createElement('img');
-                        // 💡 修正圖片路徑：同樣需要向上跳一階
                         const cleanSrc = src.trim();
                         img.src = cleanSrc.startsWith('http') ? cleanSrc : "../" + cleanSrc; 
                         img.className = 'full-img';
