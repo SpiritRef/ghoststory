@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>載入中... | 鬼磕頭日誌</title>
-    <link rel="icon" href="../../pic/GhostKowtow.jpg" type="image/jpeg">
-    <link rel="stylesheet" href="../../CSS/postFB.css">
+    <link rel="icon" href="../pic/GhostKowtow.jpg" type="image/jpeg">
+    <link rel="stylesheet" href="../CSS/postFB.css">
     <style>
         /* 文章頁專用樣式 (RWD 強化) */
         body { background: #f0f2f5; margin: 0; padding: 0; overflow-x: hidden; }
@@ -39,11 +39,11 @@
 <div class="container article-container">
     <a href="../index.html" class="back-btn-top">← 返回列表</a>
     <div id="art-date" class="post-date" style="color: #65676b; font-size: 0.85rem;"></div>
-    <h1 id="art-title">正在召喚靈界文字...</h1>
+    <h1 id="art-title">正在加載中...</h1>
     <hr style="border: 0; border-top: 1px solid #eee;">
     <div id="art-images"></div>
     <div id="art-body" class="full-content">
-        <div class="loading-hint">正在感應靈界紀錄...</div>
+        <div class="loading-hint">正在讀取日誌內容...</div>
     </div>
 </div>
 
@@ -89,15 +89,14 @@
         if (cached) renderPost(JSON.parse(cached), targetId);
 
         try {
-            // 💡 修正 INI 路徑：向上跳兩層
-            const config = await getIni('../../settings/postFB.ini');
+            // 💡 修正 INI 路徑：向上跳一層
+            const config = await getIni('../settings/postFB.ini');
             if (!config) return;
 
             if (config.MENU_DATA) renderMenu(config.MENU_DATA);
 
             const apiAddr = config.API_URL ? atob(config.API_URL) : "";
-            // 💡 修正 JSON 路徑：確保相對於當前頁面的位置正確 (通常也在根目錄)
-            const jsonPath = "../../" + config.JsonData.replace('../', '');
+            const jsonPath = "../" + config.JsonData;
 
             if (!document.getElementById('art-title').innerText || document.getElementById('art-title').innerText.includes("正在召喚")) {
                 const staticRes = await fetch(jsonPath);
