@@ -10,21 +10,22 @@ let API_URL = "";
 let JsonData = "";
 
 async function initApp() {
-    const iniPath = 'settings/postFB.ini'; 
+    const iniPath = 'settings/postFB.ini';
+    const dataPromise = loadData(); 
     const config = await getIni(iniPath);
     
     if (config) {
         if (config.MENU_DATA) initMenu(config.MENU_DATA);
         if (config.API_URL) {
             API_URL = atob(config.API_URL);
-            await loadData();
+            // 💡 當 INI 解析出 API_URL 後，再告訴 loadData 可以去抓遠端更新了
+            window.dispatchEvent(new CustomEvent('apiUrlReady', { detail: API_URL }));
         }
         if(config.JsonData) JsonData = config.JsonData;
     } else {
         console.error("無法載入 INI 設定");
     }
 }
-
 function initMenu(menuData) {
     const menuContent = document.getElementById('menuContent');
     if (!menuContent) return;
@@ -43,67 +44,54 @@ function initMenu(menuData) {
     });
 }
 
-// async function loadData() {
-//     const list = document.getElementById('post-list');
-//     const localData = localStorage.getItem('cached_novel_data');
-//     if (localData) {
-//         allPosts = JSON.parse(localData);
-//         updateTitleDropdown();
-//         updateDisplay();
-//     }
-//     try {
-//         const res = await fetch(API_URL);
-//         const newData = await res.json();
-//         if (JSON.stringify(newData) !== localData) {
-//             allPosts = newData;
-//             localStorage.setItem('cached_novel_data', JSON.stringify(newData));
-//             updateTitleDropdown();
-//             updateDisplay();
-//         }
-//     } catch (e) {
-//         console.error("更新失敗", e);
-//     }
-// }
 async function loadData() {
-    const list = document.getElementById('post-list');
-    
-    // --- 第一階段：快取/本地讀取 (秒開) ---
+    // --- 第一階段：優先讀取快取 (毫秒級響應) ---
     const localCache = localStorage.getItem('cached_novel_data');
-    
     if (localCache) {
-        // 1. 如果 localStorage 有資料，先用它的
         allPosts = JSON.parse(localCache);
         refreshUI();
-    } else {
-        // 2. 如果沒有快取，嘗試讀取靜態目錄下的 JSON (當作預設資料)
+    } 
+
+    // --- 第二階段：若快取無資料，則抓取靜態 JSON (GitHub 上的檔案) ---
+    // 備註：這裡假設你知道靜態 JSON 的路徑，例如 '../Data/postFB.json'
+    if (allPosts.length === 0) {
         try {
             const staticRes = await fetch(JsonData);
             if (staticRes.ok) {
-                const staticData = await staticRes.json();
-                allPosts = staticData;
+                allPosts = await staticRes.json();
                 refreshUI();
             }
-        } catch (e) {
-            console.log("本地無預設資料，等待 API...");
-        }
+        } catch (e) { console.log("本地無預設資料"); }
     }
 
-    // --- 第二階段：非同步請求最新資料 (背景更新) ---
+    // --- 第三階段：等 API_URL 準備好後，再去抓最新資料 ---
+    if (API_URL) {
+        fetchRemoteData();
+    } else {
+        // 如果執行到這 API_URL 還沒出來，監聽事件
+        window.addEventListener('apiUrlReady', (e) => {
+            API_URL = e.detail;
+            fetchRemoteData();
+        }, { once: true });
+    }
+}
+
+// 獨立出來的遠端更新邏輯
+async function fetchRemoteData() {
     try {
         const res = await fetch(API_URL);
-        if (!res.ok) throw new Error("API 請求失敗");
-        
+        if (!res.ok) return;
         const newData = await res.json();
         
-        // 檢查新資料是否跟目前顯示的資料不同
-        if (JSON.stringify(newData) !== JSON.stringify(allPosts)) {
-            console.log("發現新內容，正在更新...");
+        // 只有在資料真的不同時才重新渲染，避免閃爍
+        if (JSON.stringify(newData) !== localStorage.getItem('cached_novel_data')) {
+            console.log("⚡ 背景更新完成");
             allPosts = newData;
             localStorage.setItem('cached_novel_data', JSON.stringify(newData));
-            refreshUI(); // 靜默更新 UI
+            refreshUI();
         }
     } catch (e) {
-        console.error("背景更新失敗", e);
+        console.error("API 更新失敗", e);
     }
 }
 
@@ -144,7 +132,7 @@ function renderList(posts) {
             imgData.split(/\r?\n|\|/).slice(0, 3).forEach(src => {
                 const cleanSrc = src.trim();
                 if(cleanSrc) {
-                    imgHtml += `<img src="${cleanSrc}" class="thumb-img" onerror="this.style.display='none'">`;
+                    imgHtml += `<img src="${cleanSrc}" class="thumb-img" loading="lazy" onerror="this.style.display='none'">`;
                 }
             });
             imgHtml += `</div>`;
