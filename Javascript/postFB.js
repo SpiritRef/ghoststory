@@ -13,7 +13,7 @@ let JsonData = "";
  * 1. 系統初始化
  */
 async function initApp() {
-    const iniPath = 'settings/postFB.ini';
+    const iniPath = 'https://spiritref.github.io/settings/global.ini';
     const config = await getIni(iniPath);
     
     if (config) {
