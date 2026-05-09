@@ -4,12 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>鬼磕頭日誌 | 靈界紀實</title>
-    <link rel="icon" href="pic/GhostKowtow.jpg" type="image/jpeg">
+    <meta name="description" content="穿梭陰陽，紀錄最真實的靈界對話。收錄鬼磕頭紀實、靈異故事與真實案例。">
+    <link rel="icon" href="https://spiritref.github.io/GhostKowtow.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="https://spiritref.github.io/GhostKowtow.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="https://spiritref.github.io/ghoststory/pic/GhostKowtow.jpg">
+    <meta property="og:title" content="鬼磕頭日誌 | 靈界紀實">
+    <meta property="og:description" content="穿梭陰陽，紀錄最真實的靈界對話。">
+    <meta property="og:image" content="https://spiritref.github.io/ghoststory/pic/GhostKowtow.jpg">
+    <meta property="og:url" content="https://spiritref.github.io">
+    <meta property="og:type" content="website">
     <link rel="stylesheet" href="CSS/postFB.css">
 </head>
 <body>
 
-<!-- 懸浮選單 -->
 <div class="expandable-menu-container" id="menuContainer">
     <div class="menu-content" id="menuContent"></div>
     <button class="floating-service-btn" id="serviceBtn" onclick="toggleMenu()">
@@ -22,27 +29,22 @@
     <h1>📖 鬼磕頭紀實</h1>
     <p style="text-align: center;">—— 穿梭陰陽，紀錄最真實的靈界對話 ——</p>
     
-    <!-- 搜尋與收藏篩選區 -->
     <div class="search-group">
         <input type="text" id="search" class="search-bar" placeholder="🔍 搜尋內容..." oninput="currentPage=1; updateDisplay()">
         <button id="favToggle" class="filter-fav-btn" onclick="toggleFavFilter()">⭐ 收藏</button>
     </div>
 
-    <!-- 主題分類篩選 -->
     <select id="titleFilter" class="search-bar title-select" style="margin-top: -5px; background-color: #fff;" onchange="currentPage=1; updateDisplay()">
         <option value="">📌 所有主題標題</option>
     </select>
 
-    <!-- 文章列表呈現區 -->
     <div id="post-list">
         <p style="text-align:center; padding:50px; color:#888;">正在載入資料...</p>
     </div>
 </div>
 
-<!-- 底部固定導覽座 -->
 <div class="bottom-dock">
     <div class="dock-container">
-        <!-- 排序與每頁筆數 -->
         <div class="control-row">
             <select id="sortOrder" class="control-select" onchange="updateDisplay()">
                 <option value="desc">最新更新 (倒序)</option>
@@ -58,7 +60,6 @@
             </select>
         </div>
         
-        <!-- 分頁與跳頁導覽 -->
         <div class="pagination">
             <button onclick="changePage(-1)" id="prevBtn" class="page-btn">上一頁</button>
             
@@ -74,8 +75,6 @@
         </div>
     </div>
 </div>
-
-<!-- 文章彈窗 -->
 <div id="postModal" style="display:none;">
     <div id="modal-header-title"></div>
     <div id="modal-images"></div>
@@ -85,27 +84,7 @@
 <footer>
     <p>&copy; 2026 鬼磕頭日誌 | 靈界紀實. All Rights Reserved.</p>
 </footer>
-
-<!-- 核心邏輯 -->
 <script type="module" src="Javascript/postFB.js"></script>
-
-<!-- 全域橋接函式 -->
-<script>
-    window.toggleMenu = function() {
-        const menu = document.getElementById('menuContainer');
-        if (menu) menu.classList.toggle('show-menu');
-    };
-
-    window.jumpToPage = function() {
-        const select = document.getElementById('pageJump');
-        if (select && window.updateDisplay) {
-            // 觸發自定義跳頁事件或直接修改全域變數
-            window.currentPage = parseInt(select.value);
-            window.updateDisplay();
-            window.scrollTo(0, 0);
-        }
-    };
-</script>
 
 </body>
 </html>
