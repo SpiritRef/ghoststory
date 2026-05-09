@@ -126,7 +126,7 @@
 
             if (config.MENU_DATA) renderMenu(config.MENU_DATA);
 
-            const jsonPath = "../" + config.JsonData;
+            const jsonPath = config.JsonData;
             try {
                 const staticRes = await fetch(jsonPath);
                 if (staticRes.ok) {
