@@ -323,3 +323,17 @@ window.jumpToPage = () => {
 window.addEventListener('DOMContentLoaded', () => {
     initApp().catch(err => console.error("啟動失敗:", err));
 });
+window.toggleMenu = function() {
+    const menu = document.getElementById('menuContainer');
+    if (menu) menu.classList.toggle('show-menu');
+};
+
+window.jumpToPage = function() {
+    const select = document.getElementById('pageJump');
+    if (select && window.updateDisplay) {
+        // 觸發自定義跳頁事件或直接修改全域變數
+        window.currentPage = parseInt(select.value);
+        window.updateDisplay();
+        window.scrollTo(0, 0);
+    }
+};
