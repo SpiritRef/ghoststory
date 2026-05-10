@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>載入中... | 鬼磕頭日誌</title>
-    <link rel="icon" href="../pic/GhostKowtow.jpg" type="image/jpeg">
-    <link rel="stylesheet" href="../CSS/postFB.css">
+    <link rel="icon" href="/GhostKowtow.jpg" type="image/jpeg">
+	<link rel="stylesheet" href="/CSS/global.css">
+    <link rel="stylesheet" href="/ghoststory/CSS/postFB.css">
     <style>
         body { background: #f0f2f5; margin: 0; padding: 0; overflow-x: hidden; }
         .article-container { 
@@ -16,33 +17,6 @@
         .full-img { width: 100%; max-width: 100%; height: auto; display: block; margin: 20px auto; border-radius: 8px; }
         .full-content { font-size: 1.1rem; line-height: 1.8; white-space: pre-wrap; word-wrap: break-word; color: #333; margin-top: 20px; }
         h1#art-title { font-size: 1.5rem; line-height: 1.4; color: #1c1e21; margin: 15px 0; }
-        
-        /* 💡 返回列表按鈕樣式與 menu-item 配色同步 */
-        .back-btn-top { 
-            display: inline-flex; 
-            align-items: center; 
-            gap: 10px; 
-            padding: 10px 12px; 
-            border-radius: 8px; 
-            color: #1c1e21; 
-            text-decoration: none; 
-            font-size: 0.95rem; 
-            font-weight: bold; 
-            margin-bottom: 20px; 
-            transition: all 0.3s ease;
-        }
-        .back-btn-top:hover { 
-            background: rgba(255, 193, 7, 0.1); 
-            color: #ffc107; 
-        }
-
-        /* 💡 選單圖示加大 */
-        #serviceIcon {
-            font-size: 150%;
-            line-height: 1;
-            display: inline-block;
-        }
-
         .loading-hint { text-align: center; color: #888; padding: 100px 20px; font-style: italic; }
 
         @media (max-width: 600px) {
@@ -69,10 +43,7 @@
     
 <div class="container article-container">
     <!-- 💡 返回按鈕結構優化以支援 gap 佈局 -->
-    <a href="../index.html" class="back-btn-top">
-        <span>⬅</span>
-        <span>返回列表</span>
-    </a>
+	<a href="../index.html" class="back-home">&#x2190;&#xFE0E; 返回首頁</a>
 
     <div id="art-date" class="post-date" style="color: #65676b; font-size: 0.85rem;"></div>
     <h1 id="art-title">正在讀取內容...</h1>
@@ -127,7 +98,7 @@
         }
 
         try {
-            const config = await getIni('https://spiritref.github.io/settings/global.ini');
+            const config = await getIni('/settings/global.ini');
             if (!config) return;
 
             if (config.MENU_DATA) renderMenu(config.MENU_DATA);
