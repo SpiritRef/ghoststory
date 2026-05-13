@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, follow">
     <title>迷失方向 - 鬼磕頭</title>
+
+    <link rel="icon" href="https://spiritref.github.io/GhostKowtow.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="https://spiritref.github.io/GhostKowtow.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="https://spiritref.github.io/GhostKowtow.jpg">
     <style>
         body {
             background-color: #1a1a1a; /* 深色背景 */
@@ -32,12 +37,12 @@
 <body>
     <div class="container">
         <h1>此路不通</h1>
-        <p>您似乎誤入了迷霧之中...<br>將在 <span id="timer" class="countdown">5</span> 秒後帶您回到人間。</p>
-        <p><a href="https://spiritref.github.io/ghoststory/" class="link">直接返回日誌頁面</a></p>
+        <p>您似乎誤入了迷霧之中...<br>將在 <span id="timer" class="countdown">3</span> 秒後帶您回到人間。</p>
+        <p><a href="https://spiritref.github.io/ghoststory/" class="link">直接返回日誌首頁</a></p>
     </div>
 
     <script>
-        let timeLeft = 5;
+        let timeLeft = 3;
         const timerElement = document.getElementById('timer');
         
         const countdown = setInterval(() => {
@@ -45,7 +50,7 @@
             timerElement.textContent = timeLeft;
             if (timeLeft <= 0) {
                 clearInterval(countdown);
-                window.location.href = "https://spiritref.github.io/ghoststory/";
+                window.location.replace("https://spiritref.github.io/ghoststory/");
             }
         }, 1000);
     </script>
