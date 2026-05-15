@@ -13,7 +13,7 @@ let JsonData = "";
  * 1. 系統初始化
  */
 async function initApp() {
-    const iniPath = 'https://spiritref.github.io/settings/global.ini';
+    const iniPath = '/settings/global.ini';
     const config = await getIni(iniPath);
     
     if (config) {
@@ -23,8 +23,8 @@ async function initApp() {
         // 啟動資料讀取程序
         loadData(); 
 
-        if (config.API_URL) {
-            API_URL = atob(config.API_URL);
+        if (config.NOVEL_API_URL) {
+            API_URL = atob(config.NOVEL_API_URL);
             // 廣播 API 已就緒
             window.dispatchEvent(new CustomEvent('apiUrlReady', { detail: API_URL }));
         }
