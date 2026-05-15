@@ -1,7 +1,7 @@
 import * as utils from './API.js';
 
 // --- 1. 配置設定 ---
-const iniPath = 'settings/inputData.ini';
+const iniPath = 'https://spiritref.github.io/settings/global.ini';
 const GITHUB_USER = "SpiritRef";
 const GITHUB_REPO = "ghoststory";
 const GITHUB_PATH = "pic"; 
