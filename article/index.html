@@ -185,7 +185,7 @@
                 }
             } catch(e) { console.warn("JSON 載入失敗"); }
 
-            const apiAddr = config.API_URL ? atob(config.API_URL) : "";
+            const apiAddr = config.NOVEL_API_URL ? atob(config.NOVEL_API_URL) : "";
             if (apiAddr) {
                 const res = await fetch(apiAddr);
                 if (res.ok) {
