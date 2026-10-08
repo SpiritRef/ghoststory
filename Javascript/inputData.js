@@ -1,4 +1,14 @@
 import * as utils from './API.js';
+import { supabase } from './adminAuth.js';
+
+async function requireSession() {
+	const { data } = await supabase.auth.getSession();
+	if (!data.session) {
+		location.replace('login.html');
+		return null;
+	}
+	return data.session;
+}
 
 // --- 1. 配置設定 ---
 const iniPath = '/settings/global.ini';
@@ -63,6 +73,8 @@ async function checkUser() {
 
 // --- 核心功能：多檔案上傳 ---
 window.uploadToGithub = async function() {
+	const session = await requireSession();
+	if (!session) return;
 	if (!finalToken) {
 		const ok = await checkUser();
 		if (!ok) return;
@@ -148,6 +160,8 @@ window.uploadToGithub = async function() {
 }
 
 window.sendData = async function() {
+	const session = await requireSession();
+	if (!session) return;
 	if (!finalToken) {
 		const ok = await checkUser();
 		if (!ok) return;
@@ -164,6 +178,7 @@ window.sendData = async function() {
 			headers: { "Content-Type": "text/plain" },
 			body: JSON.stringify({
 				token: document.getElementById('token').value.trim(),
+				supabase_token: session.access_token,
 				date: document.getElementById('date').value.replaceAll('/', '-') + " +08:00",
 				title: document.getElementById('title').value,
 				content: document.getElementById('content').value,

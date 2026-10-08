@@ -15,19 +15,30 @@ let JsonData = "";
 async function initApp() {
     const iniPath = '/settings/global.ini';
     const config = await getIni(iniPath);
+
+    // 支援 ?refresh=1 手動清除舊快取
+    try {
+        if (new URLSearchParams(location.search).get('refresh') === '1') {
+            localStorage.removeItem('cached_novel_data');
+        }
+    } catch (e) { /* 忽略 URL 解析失敗 */ }
     
     if (config) {
         if (config.MENU_DATA) initMenu(config.MENU_DATA);
         if (config.JsonData) JsonData = config.JsonData; 
         
+        // 先解出 API 再啟動載入，避免 apiUrlReady 事件錯過的 race
+        if (config.NOVEL_API_URL) {
+            try {
+                API_URL = config.NOVEL_API_URL.startsWith("http")
+                    ? config.NOVEL_API_URL
+                    : atob(config.NOVEL_API_URL);
+            } catch (e) {
+                console.error("API 位址解碼失敗:", e);
+            }
+        }
         // 啟動資料讀取程序
         loadData(); 
-
-        if (config.NOVEL_API_URL) {
-            API_URL = atob(config.NOVEL_API_URL);
-            // 廣播 API 已就緒
-            window.dispatchEvent(new CustomEvent('apiUrlReady', { detail: API_URL }));
-        }
     } else {
         console.error("無法載入 INI 設定檔");
     }
@@ -68,7 +79,8 @@ async function loadData() {
     // B. 若無快取，則抓取靜態備份
     if (allPosts.length === 0 && JsonData) {
         try {
-            const staticRes = await fetch(JsonData);
+            const sep = JsonData.includes('?') ? '&' : '?';
+            const staticRes = await fetch(`${JsonData}${sep}t=${Date.now()}`, { cache: 'no-store' });
             if (staticRes.ok) {
                 allPosts = await staticRes.json();
                 refreshUI();
@@ -79,11 +91,6 @@ async function loadData() {
     // C. 處理遠端最新資料同步
     if (API_URL) {
         fetchRemoteData();
-    } else {
-        window.addEventListener('apiUrlReady', (e) => {
-            API_URL = e.detail;
-            fetchRemoteData();
-        }, { once: true });
     }
 }
 
@@ -92,8 +99,12 @@ async function loadData() {
  */
 async function fetchRemoteData() {
     try {
-        const res = await fetch(API_URL);
-        if (!res.ok) return;
+        const sep = API_URL.includes('?') ? '&' : '?';
+        const res = await fetch(`${API_URL}${sep}t=${Date.now()}`, { cache: 'no-store' });
+        if (!res.ok) {
+            console.warn(`遠端同步失敗: HTTP ${res.status}，目前顯示的是本機快取。請檢查 GAS 是否已重新部署。`);
+            return;
+        }
         const newData = await res.json();
         
         // 只有在資料真的有變動時才處理
@@ -104,16 +115,26 @@ async function fetchRemoteData() {
             console.log("⚡ 優先渲染首頁內容...");
             refreshUI();
 
-            // 💡 步驟二：後台處理重型任務 (存入快取)
-            setTimeout(() => {
+            // 💡 步驟二：同步寫入快取（不可延遲，避免關閉頁面遺失更新）
+            try {
                 localStorage.setItem('cached_novel_data', JSON.stringify(newData));
-                console.log("✅ 背景資料庫快取同步完成");
-            }, 200);
+                console.log("✅ 資料庫快取同步完成");
+            } catch (e) {
+                console.warn("快取寫入失敗（容量不足？）:", e);
+            }
+        } else {
+            console.log("✅ 遠端資料與快取一致，已是最新");
         }
     } catch (e) {
-        console.error("遠端同步失敗:", e);
+        console.error("遠端同步失敗（目前顯示本機快取）:", e);
     }
 }
+
+// 手動強制更新：清快取後重載
+window.forceRefresh = () => {
+    localStorage.removeItem('cached_novel_data');
+    location.reload();
+};
 
 function refreshUI() {
     updateTitleDropdown();
@@ -318,22 +339,14 @@ window.jumpToPage = () => {
         window.scrollTo(0, 0);
     }
 };
+// 相容 HTML 內聯 currentPage 寫法
+Object.defineProperty(window, 'currentPage', {
+    get: () => currentPage,
+    set: (v) => { currentPage = v; },
+    configurable: true
+});
 
 // 系統啟動
 window.addEventListener('DOMContentLoaded', () => {
     initApp().catch(err => console.error("啟動失敗:", err));
 });
-window.toggleMenu = function() {
-    const menu = document.getElementById('menuContainer');
-    if (menu) menu.classList.toggle('show-menu');
-};
-
-window.jumpToPage = function() {
-    const select = document.getElementById('pageJump');
-    if (select && window.updateDisplay) {
-        // 觸發自定義跳頁事件或直接修改全域變數
-        window.currentPage = parseInt(select.value);
-        window.updateDisplay();
-        window.scrollTo(0, 0);
-    }
-};

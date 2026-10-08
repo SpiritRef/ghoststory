@@ -187,7 +187,8 @@
 
             const jsonPath = config.JsonData;
             try {
-                const staticRes = await fetch(jsonPath);
+                const sep = jsonPath.includes('?') ? '&' : '?';
+                const staticRes = await fetch(`${jsonPath}${sep}t=${Date.now()}`, { cache: 'no-store' });
                 if (staticRes.ok) {
                     const staticData = await staticRes.json();
                     console.log("使用 JSON 同步");
@@ -195,9 +196,11 @@
                 }
             } catch(e) { console.warn("JSON 載入失敗"); }
 
-            const apiAddr = config.NOVEL_API_URL ? atob(config.NOVEL_API_URL) : "";
+            const rawNovel = config.NOVEL_API_URL || "";
+            const apiAddr = (rawNovel.startsWith("http") ? rawNovel : (rawNovel ? atob(rawNovel) : ""));
             if (apiAddr) {
-                const res = await fetch(apiAddr);
+                const sep = apiAddr.includes('?') ? '&' : '?';
+                const res = await fetch(`${apiAddr}${sep}t=${Date.now()}`, { cache: 'no-store' });
                 if (res.ok) {
                     const newData = await res.json();
                     console.log("使用 API 最終同步");

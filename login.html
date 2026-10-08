@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="robots" content="noindex,nofollow">
+	<title>後台登入 | 鬼磕頭</title>
+	<link rel="icon" href="https://spiritref.github.io/GhostKowtow.ico" type="image/x-icon">
+	<style>
+		body { font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; background: #f8f9fa; padding: 20px; display: flex; justify-content: center; }
+		.admin-card { background: linear-gradient(135deg, #f7ebd7 0%, #e6d3af 100%); padding: 25px; border-radius: 12px; border: 1px solid #dcbfa2; border-left: 5px solid #8b7355; box-shadow: 0 4px 10px rgba(0,0,0,0.05); width: 100%; max-width: 400px; color: #3e2723; }
+		.field { margin-bottom: 15px; }
+		label { display: block; margin-bottom: 5px; font-weight: bold; color: #4a2e1b; }
+		input { width: 100%; padding: 10px; border: 1px solid #dcbfa2; border-radius: 6px; box-sizing: border-box; background: #fff; }
+		button { width: 100%; padding: 12px; background: #8b7355; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-family: inherit; font-weight: bold; }
+		button:hover { background: #6d5a3e; }
+		button:disabled { opacity: 0.6; cursor: wait; }
+		#status { margin-top: 15px; text-align: center; font-weight: bold; font-size: 14px; color: #4a2e1b; }
+		h2 { color: #4a2e1b; margin-top: 0; }
+	</style>
+</head>
+<body>
+
+<div class="admin-card">
+	<h2>🔑 後台登入</h2>
+	<div class="field">
+		<label>Email</label>
+		<input type="email" id="email" placeholder="admin@example.com" autocomplete="username">
+	</div>
+	<div class="field">
+		<label>密碼</label>
+		<input type="password" id="password" placeholder="請輸入密碼" autocomplete="current-password">
+	</div>
+	<button id="loginBtn">登入</button>
+	<div id="status"></div>
+</div>
+
+<script type="module">
+	import { supabase } from './Javascript/adminAuth.js';
+
+	const status = document.getElementById('status');
+	const btn = document.getElementById('loginBtn');
+
+	// 已登入直接進後台
+	const { data } = await supabase.auth.getSession();
+	if (data.session) location.replace('inputData.html');
+
+	btn.onclick = async () => {
+		const email = document.getElementById('email').value.trim();
+		const password = document.getElementById('password').value;
+		if (!email || !password) { status.innerText = '請輸入 Email 與密碼'; return; }
+		btn.disabled = true;
+		status.innerText = '登入中...';
+		const { error } = await supabase.auth.signInWithPassword({ email, password });
+		if (error) {
+			status.innerText = '登入失敗：' + error.message;
+			btn.disabled = false;
+			return;
+		}
+		location.replace('inputData.html');
+	};
+</script>
+
+</body>
+</html>

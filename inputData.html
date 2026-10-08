@@ -2,6 +2,7 @@
 <html lang="zh-TW">
 <head>
 	<meta charset="UTF-8">
+	<meta name="robots" content="noindex,nofollow">
 	<title>小說庫後台 - 內容匯入與圖片上傳</title>
 	<link rel="icon" href="https://spiritref.github.io/GhostKowtow.ico" type="image/x-icon">
     <link rel="shortcut icon" href="https://spiritref.github.io/GhostKowtow.ico" type="image/x-icon">
@@ -27,7 +28,11 @@
 <body>
 
 <div class="admin-card">
-	<h2>🔑 內容匯入管理</h2>
+	<div style="display:flex;justify-content:space-between;align-items:center;">
+		<h2 style="margin:0;">🔑 內容匯入管理</h2>
+		<button id="logoutBtn" style="width:auto;padding:6px 12px;font-size:13px;">登出</button>
+	</div>
+	<div id="adminUser" style="font-size:12px;margin:8px 0 0;color:#8b7355;">驗證登入中...</div>
 	
 	<div class="field">
 		<label>Admin 上傳密碼</label>
@@ -67,6 +72,17 @@
 </div>
 
 <script type="module" src="Javascript/inputData.js"></script>
+<script type="module">
+	import { requireAdmin, logoutAndGo, supabase } from './Javascript/adminAuth.js';
+	const session = await requireAdmin('login.html');
+	if (session) {
+		document.getElementById('adminUser').innerText = '已登入：' + (session.user?.email || '');
+	}
+	document.getElementById('logoutBtn').onclick = () => logoutAndGo('login.html');
+	supabase.auth.onAuthStateChange((_event, s) => {
+		if (!s) location.replace('login.html');
+	});
+</script>
 
 </body>
 </html>
