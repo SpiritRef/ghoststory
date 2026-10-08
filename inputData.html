@@ -9,7 +9,8 @@
     <link rel="apple-touch-icon" href="https://spiritref.github.io/GhostKowtow.jpg">
 	<style>
 		body { font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; background: #f8f9fa; padding: 20px; display: flex; justify-content: center; }
-		.admin-card { background: linear-gradient(135deg, #f7ebd7 0%, #e6d3af 100%); padding: 25px; border-radius: 12px; border: 1px solid #dcbfa2; border-left: 5px solid #8b7355; box-shadow: 0 4px 10px rgba(0,0,0,0.05); width: 100%; max-width: 450px; color: #3e2723; }
+		.admin-card { background: linear-gradient(135deg, #f7ebd7 0%, #e6d3af 100%); padding: 25px; border-radius: 12px; border: 1px solid #dcbfa2; border-left: 5px solid #8b7355; box-shadow: 0 4px 10px rgba(0,0,0,0.05); width: 100%; max-width: 450px; color: #3e2723; display: none; }
+		#gateMsg { background: #fff; padding: 25px; border-radius: 12px; border: 1px solid #dcbfa2; width: 100%; max-width: 450px; text-align: center; font-weight: bold; color: #4a2e1b; }
 		.field { margin-bottom: 15px; }
 		label { display: block; margin-bottom: 5px; font-weight: bold; color: #4a2e1b; }
 		input, textarea { width: 100%; padding: 10px; border: 1px solid #dcbfa2; border-radius: 6px; box-sizing: border-box; background: #fff; }
@@ -27,7 +28,8 @@
 </head>
 <body>
 
-<div class="admin-card">
+<div id="gateMsg">🔒 驗證登入中...</div>
+<div class="admin-card" id="adminCard">
 	<div style="display:flex;justify-content:space-between;align-items:center;">
 		<h2 style="margin:0;">🔑 內容匯入管理</h2>
 		<button id="logoutBtn" style="width:auto;padding:6px 12px;font-size:13px;">登出</button>
@@ -72,11 +74,27 @@
 </div>
 
 <script type="module" src="Javascript/inputData.js"></script>
+<script>
+	// fail-closed 兜底：8 秒內 gate 沒完成，代表 CDN/模組載入失敗，表單保持隱藏
+	setTimeout(function() {
+		if (!window.__adminGated) {
+			var m = document.getElementById('gateMsg');
+			if (m) m.innerHTML = '⚠️ 驗證元件載入失敗，請檢查網路後重整。<br><a href="login.html">前往登入頁</a>';
+		}
+	}, 8000);
+</script>
 <script type="module">
 	import { requireAdmin, logoutAndGo, supabase } from './Javascript/adminAuth.js';
-	const session = await requireAdmin('login.html');
-	if (session) {
-		document.getElementById('adminUser').innerText = '已登入：' + (session.user?.email || '');
+	try {
+		const session = await requireAdmin('login.html');
+		if (session) {
+			document.getElementById('adminUser').innerText = '已登入：' + (session.user?.email || '');
+			document.getElementById('adminCard').style.display = 'block';
+			document.getElementById('gateMsg').style.display = 'none';
+			window.__adminGated = true;
+		}
+	} catch (e) {
+		document.getElementById('gateMsg').innerHTML = '⚠️ 驗證失敗：' + (e?.message || e) + '<br><a href="login.html">前往登入頁</a>';
 	}
 	document.getElementById('logoutBtn').onclick = () => logoutAndGo('login.html');
 	supabase.auth.onAuthStateChange((_event, s) => {
