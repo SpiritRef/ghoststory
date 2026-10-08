@@ -14,10 +14,14 @@ async function requireSession() {
 const iniPath = '/settings/global.ini';
 const GITHUB_USER = "SpiritRef";
 const GITHUB_REPO = "ghoststory";
-const GITHUB_PATH = "pic"; 
+const GITHUB_PATH = "pic";
+// JSON 備份檔目標：固定檔名，前端 INI 的 JsonData 會指向它
+const JSON_REPO = "spiritref.github.io";
+const JSON_PATH = "Data/postFB.json";
 
 let updateGithub_URL = "";
 let updateData_URL = "";
+let novelApiB64 = "";
 let finalToken = ""; 
 
 async function initApp() {
@@ -25,6 +29,7 @@ async function initApp() {
 		const config = await utils.getIni(iniPath);
 		updateGithub_URL = config.updateGithub_URL; 
 		updateData_URL = config.updateData_URL;
+		novelApiB64 = config.NOVEL_API_URL || "";
 		updateTime();
 		console.log("✅ 系統設定載入成功");
 	} catch (e) {
@@ -188,6 +193,9 @@ window.sendData = async function() {
 
 		status.innerText = "✅ 全數完成！資料已匯入資料庫。";
 		status.style.color = "green";
+
+		// 上傳後自動同步全量 JSON 備份
+		await window.syncJsonToGithub();
 		
 		document.getElementById('title').value = "";
 		document.getElementById('content').value = "";
@@ -198,6 +206,67 @@ window.sendData = async function() {
 	} catch (e) {
 		status.innerText = "❌ 資料庫匯入失敗。";
 		console.error(e);
+	}
+}
+
+// --- 3. 同步全量 JSON 到 GitHub（上傳後自動呼叫，也可手動重試） ---
+function toBase64Utf8(str) {
+	const bytes = new TextEncoder().encode(str);
+	let bin = "";
+	const CH = 0x8000;
+	for (let i = 0; i < bytes.length; i += CH) {
+		bin += String.fromCharCode.apply(null, bytes.subarray(i, i + CH));
+	}
+	return btoa(bin);
+}
+
+window.syncJsonToGithub = async function() {
+	const session = await requireSession();
+	if (!session) return;
+	if (!finalToken) {
+		const ok = await checkUser();
+		if (!ok) return;
+	}
+	const status = document.getElementById('status');
+	try {
+		if (!novelApiB64) throw new Error("INI 缺少 NOVEL_API_URL");
+		const apiUrl = novelApiB64.startsWith("http") ? novelApiB64 : atob(novelApiB64);
+
+		status.innerText = "⏳ 正在抓取全部內容...";
+		status.style.color = "blue";
+		const sep = apiUrl.includes('?') ? '&' : '?';
+		const res = await fetch(`${apiUrl}${sep}t=${Date.now()}`, { cache: 'no-store' });
+		if (!res.ok) throw new Error(`API 回應 HTTP ${res.status}，請檢查 GAS 是否已重新部署`);
+		const allData = await res.json();
+		if (!Array.isArray(allData)) throw new Error("API 回傳格式不是陣列");
+
+		status.innerText = `⏳ 正在上傳 JSON 到 GitHub（共 ${allData.length} 筆）...`;
+		const apiBase = `https://api.github.com/repos/${GITHUB_USER}/${JSON_REPO}/contents/${JSON_PATH}`;
+		const headers = {
+			"Authorization": `token ${finalToken}`,
+			"Accept": "application/vnd.github.v3+json",
+			"Content-Type": "application/json"
+		};
+		let sha = null;
+		const getRes = await fetch(apiBase, { headers });
+		if (getRes.ok) {
+			sha = (await getRes.json()).sha;
+		} else if (getRes.status !== 404) {
+			throw new Error(`讀取舊 JSON 失敗: HTTP ${getRes.status}（token 可能沒有 ${JSON_REPO} 寫入權限）`);
+		}
+		const putBody = { message: `Sync ${JSON_PATH}: ${allData.length} posts`, content: toBase64Utf8(JSON.stringify(allData, null, 1)) };
+		if (sha) putBody.sha = sha;
+		const putRes = await fetch(apiBase, { method: "PUT", headers, body: JSON.stringify(putBody) });
+		if (!putRes.ok) {
+			const msg = await putRes.text();
+			throw new Error(`GitHub 上傳失敗: HTTP ${putRes.status} ${msg.slice(0, 120)}`);
+		}
+		status.innerText = `✅ JSON 已同步！共 ${allData.length} 筆 → ${JSON_REPO}/${JSON_PATH}`;
+		status.style.color = "green";
+	} catch (e) {
+		console.error("JSON 同步失敗:", e);
+		status.innerText = "❌ JSON 同步失敗：" + e.message;
+		status.style.color = "red";
 	}
 }
 

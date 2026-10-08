@@ -69,7 +69,8 @@
 		<input type="text" id="pic" placeholder="pic/example.jpg">
 	</div>
 
-	<button onclick="sendData()">2. 確認匯入資料庫</button>
+	<button onclick="sendData()">2. 確認匯入資料庫（自動同步 JSON）</button>
+	<button class="btn-upload" onclick="syncJsonToGithub()">3. 手動重試：同步全量 JSON 到 GitHub</button>
 	<div id="status"></div>
 </div>
 

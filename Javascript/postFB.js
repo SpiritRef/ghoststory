@@ -76,16 +76,20 @@ async function loadData() {
         refreshUI();
     } 
 
-    // B. 若無快取，則抓取靜態備份
+    // B. 若無快取，則抓取靜態備份（含舊檔名過渡相容）
     if (allPosts.length === 0 && JsonData) {
-        try {
-            const sep = JsonData.includes('?') ? '&' : '?';
-            const staticRes = await fetch(`${JsonData}${sep}t=${Date.now()}`, { cache: 'no-store' });
-            if (staticRes.ok) {
-                allPosts = await staticRes.json();
-                refreshUI();
-            }
-        } catch (e) { console.log("本地靜態資料載入失敗"); }
+        const candidates = [JsonData, '/Data/postFB_20260508.json'].filter((v, i, a) => v && a.indexOf(v) === i);
+        for (const url of candidates) {
+            try {
+                const sep = url.includes('?') ? '&' : '?';
+                const staticRes = await fetch(`${url}${sep}t=${Date.now()}`, { cache: 'no-store' });
+                if (staticRes.ok) {
+                    allPosts = await staticRes.json();
+                    refreshUI();
+                    break;
+                }
+            } catch (e) { console.log("本地靜態資料載入失敗:", url); }
+        }
     }
 
     // C. 處理遠端最新資料同步
