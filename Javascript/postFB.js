@@ -227,7 +227,7 @@ function renderList(posts) {
         card.innerHTML = `
             <span class="fav-btn ${isFav ? 'active' : ''}" 
                   onclick="window.toggleFavorite('${urlId}', event)">${isFav ? '★' : '☆'}</span>
-            <div class="post-date">${dateStr}</div>
+            <div class="post-date">${post["置頂"] === true ? '📌' : ''}${dateStr}</div>
             <div class="post-title">${post["標題"] || "無標題"}</div>
             <div class="post-content">${(post["貼文內容"] || "").substring(0, 65)}...</div>
             ${imgHtml} 
