@@ -1,4 +1,4 @@
-import { getIni, getRemoteVersion } from '/Javascript/global.js';
+import { getIni, getRemoteVersion } from '/Javascript/global.js?v=20261011';
 
 let allPosts = [];
 let filteredPosts = [];
@@ -149,8 +149,10 @@ function updateDisplay() {
         return contentMatch && titleMatch && favMatch;
     });
 
-    // B. 執行排序
+    // B. 執行排序（置頂永遠在前，再按選擇的順序）
     filteredPosts.sort((a, b) => {
+        const pin = ((b["置頂"] === true) - (a["置頂"] === true));
+        if (pin !== 0) return pin;
         const dA = (typeof a["發佈日期"] === 'number') ? (a["發佈日期"] - 25569) : new Date(a["發佈日期"]).getTime();
         const dB = (typeof b["發佈日期"] === 'number') ? (b["發佈日期"] - 25569) : new Date(b["發佈日期"]).getTime();
         return order === 'asc' ? dA - dB : dB - dA;
