@@ -1,4 +1,4 @@
-import { getIni } from './API.js';
+import { getIni } from '/Javascript/global.js';
 
 let allPosts = [];
 let filteredPosts = [];

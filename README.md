@@ -3,7 +3,7 @@
 這是一個輕量化的自動化日誌與小說發佈系統。透過 **Google Apps Script (GAS)** 作為中控，將資料從 Google 生態系同步至 GitHub，並利用 **GitHub Pages** 呈現動態前端頁面。
 
 *   **📖 讀者前台：** [日誌庫](https://spiritref.github.io/ghoststory/)
-*   **⚙️ 內容後台：** [後台管理頁面](https://spiritref.github.io/ghoststory/inputData.html)
+*   **⚙️ 內容後台：** 限管理員，網址另行告知（不公開連結）。
 
 ---
 
@@ -35,10 +35,8 @@
 | :--- | :--- |
 | `index.html` | 主列表頁，負責搜尋、排序與分頁顯示。 |
 | `article/index.html` | 文章內容頁，根據 ID 自動渲染全文。 |
-| `inputData.html` | 後台管理介面。 |
-| `Javascript/API.js` | 核心模組，處理 INI 解析與 API 通訊。 |
-| `Javascript/postFB.js` | 主要邏輯控制與資料渲染引擎。 |
-| `Javascript/inputData.js` | 後台管理邏輯（圖片上傳、資料匯入）。 |
+| 後台（已集中至 root  repo `login/`） | 登入、發文、文章/服務管理，詳見該目錄。 |
+| `Javascript/postFB.js` | 主要邏輯控制與資料渲染引擎（共用 `global.js` 的 `getIni`）。 |
 | `settings/global.ini` | 系統設定檔（選單、API 路徑）。 |
 | `Data/` | 資料儲存目錄（JSON 格式）。 |
 | `pic/` | 圖片儲存目錄。 |
@@ -59,7 +57,7 @@ NOVEL_API_URL=...
 SERVICE_API_URL=...
 
 # 靜態 JSON 備份路徑
-JsonData=/Data/postFB_20260508.json
+JsonData=/Data/postFB.json
 JsonService=/Data/Services_20260527.json
 ```
 
