@@ -1,12 +1,11 @@
-import { getIni } from '/Javascript/global.js';
+import { getIni, getRemoteVersion } from '/Javascript/global.js';
 
 let allPosts = [];
 let filteredPosts = [];
 let currentPage = 1;
 let favorites = JSON.parse(localStorage.getItem('novel_favs')) || [];
-let showOnlyFavs = false; 
+let showOnlyFavs = false;
 
-let API_URL = "";
 let JsonData = "";
 
 /**
@@ -20,6 +19,7 @@ async function initApp() {
     try {
         if (new URLSearchParams(location.search).get('refresh') === '1') {
             localStorage.removeItem('cached_novel_data');
+            localStorage.removeItem('data_ver');
         }
     } catch (e) { /* 忽略 URL 解析失敗 */ }
     
@@ -27,17 +27,7 @@ async function initApp() {
         if (config.MENU_DATA) initMenu(config.MENU_DATA);
         if (config.JsonData) JsonData = config.JsonData; 
         
-        // 先解出 API 再啟動載入，避免 apiUrlReady 事件錯過的 race
-        if (config.NOVEL_API_URL) {
-            try {
-                API_URL = config.NOVEL_API_URL.startsWith("http")
-                    ? config.NOVEL_API_URL
-                    : atob(config.NOVEL_API_URL);
-            } catch (e) {
-                console.error("API 位址解碼失敗:", e);
-            }
-        }
-        // 啟動資料讀取程序
+        // 資料庫 = GitHub 靜態 JSON，直接載入
         loadData(); 
     } else {
         console.error("無法載入 INI 設定檔");
@@ -66,77 +56,72 @@ function initMenu(menuData) {
 }
 
 /**
- * 3. 資料載入策略 (快取優先 -> 靜態備份 -> 遠端同步)
+ * 3. 資料載入策略（資料庫 = GitHub 靜態 JSON）
+ * 快取秒開 -> 無快取讀靜態 -> 版本檔比對，有更新才重抓
  */
 async function loadData() {
     // A. 優先讀取快取 (達成秒開)
     const localCache = localStorage.getItem('cached_novel_data');
     if (localCache) {
-        allPosts = JSON.parse(localCache);
-        refreshUI();
+        try {
+            allPosts = JSON.parse(localCache);
+            refreshUI();
+        } catch (e) { allPosts = []; }
     } 
 
-    // B. 若無快取，則抓取靜態備份（含舊檔名過渡相容）
+    // B. 若無快取，則抓取靜態 JSON
     if (allPosts.length === 0 && JsonData) {
-        const candidates = [JsonData, '/Data/postFB_20260508.json'].filter((v, i, a) => v && a.indexOf(v) === i);
-        for (const url of candidates) {
-            try {
-                const sep = url.includes('?') ? '&' : '?';
-                const staticRes = await fetch(`${url}${sep}t=${Date.now()}`, { cache: 'no-store' });
-                if (staticRes.ok) {
-                    allPosts = await staticRes.json();
-                    refreshUI();
-                    break;
-                }
-            } catch (e) { console.log("本地靜態資料載入失敗:", url); }
-        }
+        await fetchStaticJson(JsonData);
     }
 
-    // C. 處理遠端最新資料同步
-    if (API_URL) {
-        fetchRemoteData();
+    // C. 版本比對：有更新才重抓靜態 JSON
+    refreshFromVersion();
+}
+
+async function fetchStaticJson(url) {
+    try {
+        const sep = url.includes('?') ? '&' : '?';
+        const res = await fetch(`${url}${sep}t=${Date.now()}`, { cache: 'no-store' });
+        if (!res.ok) return false;
+        const data = await res.json();
+        if (!Array.isArray(data)) return false;
+        allPosts = data;
+        refreshUI();
+        return true;
+    } catch (e) {
+        console.log("靜態資料載入失敗:", url);
+        return false;
     }
 }
 
 /**
- * 4. 漸進式遠端更新邏輯
+ * 4. 版本比對更新邏輯
  */
-async function fetchRemoteData() {
+async function refreshFromVersion() {
+    let remoteVer = null;
     try {
-        const sep = API_URL.includes('?') ? '&' : '?';
-        const res = await fetch(`${API_URL}${sep}t=${Date.now()}`, { cache: 'no-store' });
-        if (!res.ok) {
-            console.warn(`遠端同步失敗: HTTP ${res.status}，目前顯示的是本機快取。請檢查 GAS 是否已重新部署。`);
-            return;
+        remoteVer = await getRemoteVersion();
+    } catch (e) {}
+    if (!remoteVer) return; // 無版本檔就不動作（靠快取＋靜態）
+    try {
+        if (localStorage.getItem('data_ver') === remoteVer && allPosts.length > 0) return;
+    } catch (e) {}
+    if (!JsonData) return;
+    if (await fetchStaticJson(JsonData)) {
+        try {
+            localStorage.setItem('cached_novel_data', JSON.stringify(allPosts));
+            localStorage.setItem('data_ver', remoteVer);
+            console.log("✅ 已更新到最新版本");
+        } catch (e) {
+            console.warn("快取寫入失敗:", e);
         }
-        const newData = await res.json();
-        
-        // 只有在資料真的有變動時才處理
-        if (JSON.stringify(newData) !== localStorage.getItem('cached_novel_data')) {
-            allPosts = newData;
-            
-            // 💡 步驟一：立即渲染 UI (優先顯示首頁文章)
-            console.log("⚡ 優先渲染首頁內容...");
-            refreshUI();
-
-            // 💡 步驟二：同步寫入快取（不可延遲，避免關閉頁面遺失更新）
-            try {
-                localStorage.setItem('cached_novel_data', JSON.stringify(newData));
-                console.log("✅ 資料庫快取同步完成");
-            } catch (e) {
-                console.warn("快取寫入失敗（容量不足？）:", e);
-            }
-        } else {
-            console.log("✅ 遠端資料與快取一致，已是最新");
-        }
-    } catch (e) {
-        console.error("遠端同步失敗（目前顯示本機快取）:", e);
     }
 }
 
 // 手動強制更新：清快取後重載
 window.forceRefresh = () => {
     localStorage.removeItem('cached_novel_data');
+    localStorage.removeItem('data_ver');
     location.reload();
 };
 

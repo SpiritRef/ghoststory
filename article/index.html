@@ -175,8 +175,10 @@
 
         const cached = localStorage.getItem('cached_novel_data');
         if (cached) {
-            console.log("使用快取渲染");
-            renderPost(JSON.parse(cached), targetId);
+            try {
+                console.log("使用快取渲染");
+                renderPost(JSON.parse(cached), targetId);
+            } catch (e) {}
         }
 
         try {
@@ -185,28 +187,19 @@
 
             if (config.MENU_DATA) renderMenu(config.MENU_DATA);
 
+            // 資料庫 = GitHub 靜態 JSON
             const jsonPath = config.JsonData;
-            try {
-                const sep = jsonPath.includes('?') ? '&' : '?';
-                const staticRes = await fetch(`${jsonPath}${sep}t=${Date.now()}`, { cache: 'no-store' });
-                if (staticRes.ok) {
-                    const staticData = await staticRes.json();
-                    console.log("使用 JSON 同步");
-                    renderPost(staticData, targetId);
-                }
-            } catch(e) { console.warn("JSON 載入失敗"); }
-
-            const rawNovel = config.NOVEL_API_URL || "";
-            const apiAddr = (rawNovel.startsWith("http") ? rawNovel : (rawNovel ? atob(rawNovel) : ""));
-            if (apiAddr) {
-                const sep = apiAddr.includes('?') ? '&' : '?';
-                const res = await fetch(`${apiAddr}${sep}t=${Date.now()}`, { cache: 'no-store' });
-                if (res.ok) {
-                    const newData = await res.json();
-                    console.log("使用 API 最終同步");
-                    localStorage.setItem('cached_novel_data', JSON.stringify(newData));
-                    renderPost(newData, targetId);
-                }
+            if (jsonPath) {
+                try {
+                    const sep = jsonPath.includes('?') ? '&' : '?';
+                    const staticRes = await fetch(`${jsonPath}${sep}t=${Date.now()}`, { cache: 'no-store' });
+                    if (staticRes.ok) {
+                        const staticData = await staticRes.json();
+                        console.log("使用 JSON 同步");
+                        try { localStorage.setItem('cached_novel_data', JSON.stringify(staticData)); } catch (e) {}
+                        renderPost(staticData, targetId);
+                    }
+                } catch(e) { console.warn("JSON 載入失敗"); }
             }
         } catch (e) { 
             console.error("載入流程異常:", e); 

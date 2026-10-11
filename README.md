@@ -1,6 +1,6 @@
 # 鬼磕頭日誌 | 靈界紀實
 
-這是一個輕量化的自動化日誌與小說發佈系統。透過 **Google Apps Script (GAS)** 作為中控，將資料從 Google 生態系同步至 GitHub，並利用 **GitHub Pages** 呈現動態前端頁面。
+這是一個輕量化的日誌與小說發佈系統。資料庫就是 GitHub 上的靜態 JSON，管理後台（`login/`，位於 root repo）直接讀寫，利用 **GitHub Pages** 呈現動態前端頁面。
 
 *   **📖 讀者前台：** [日誌庫](https://spiritref.github.io/ghoststory/)
 *   **⚙️ 內容後台：** 限管理員，網址另行告知（不公開連結）。
@@ -10,8 +10,8 @@
 ## 🚀 系統特色
 
 *   **自動化資料流**：利用 App Script 透過 GitHub Token 讀取並寫入最新 JSON 檔案，達成內容自動同步。
-*   **混合快取機制**：系統優先讀取 `LocalStorage` 緩存讓頁面秒開，同時在背景對比 GitHub 最新資料，確保內容不落後。
-*   **配置解耦**：選單內容與 API 網址皆儲存於 `settings/global.ini`，無需修改程式碼即可調整系統參數。
+*   **混合快取機制**：系統優先讀取 `LocalStorage` 緩存讓頁面秒開，同時用版本檔比對 GitHub 最新資料，確保內容不落後。
+*   **配置解耦**：選單內容與資料路徑皆儲存於 `settings/global.ini`，無需修改程式碼即可調整系統參數。
 *   **牛皮紙質感設計**：全站採用統一的古典牛皮紙風格，提供沉浸式閱讀體驗。
 
 ---
@@ -52,13 +52,9 @@
 # MENU_DATA 格式：顯示名稱,連結網址,圖示符號|...
 MENU_DATA=專業服務,/services/,📜|視覺紀錄,/services/#visual-records,📽|超自然現象彙典,/services/#faq-section,💡|聯絡方式,/services/#contact,👤|靈異日誌,/ghoststory/,📖
 
-# API_URL 為 Base64 加密後的網址
-NOVEL_API_URL=...
-SERVICE_API_URL=...
-
-# 靜態 JSON 備份路徑
+# 靜態 JSON 資料庫路徑（資料庫 = GitHub 上的 JSON 檔）
 JsonData=/Data/postFB.json
-JsonService=/Data/Services_20260527.json
+JsonService=/Data/Services.json
 ```
 
 ---
